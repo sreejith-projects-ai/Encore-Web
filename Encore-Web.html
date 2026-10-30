@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encore · Raedon Theatre</title>
+<meta name="description" content="Showtimes, screen formats and re-release requests at Raedon Theatre.">
+<style>
+:root {
+  /* Modern Dark Glassmorphic Theme */
+  --primary: #0071e3;
+  --primary-active: #005bb5;
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(32px) saturate(200%);
+  
+  --text-main: #f5f5f7;
+  --text-muted: #86868b;
+  
+  /* Fallbacks and component mappings to minimize HTML/JS changes */
+  --disabled: rgba(255, 255, 255, 0.1);
+  --ink: var(--text-main);
+  --body: var(--text-muted);
+  --muted: var(--text-muted);
+  --muted-soft: rgba(255, 255, 255, 0.3);
+  --hair: var(--glass-border);
+  --canvas: transparent; /* Transparent to show ambient mesh */
+  --soft: transparent;
+  --card: var(--glass-bg);
+  --card-strong: rgba(255, 255, 255, 0.08);
+  --dark: transparent;
+  --dark-el: rgba(255, 255, 255, 0.06);
+  --dark-soft: rgba(255, 255, 255, 0.02);
+  --on-dark: var(--text-main);
+  --on-dark-soft: var(--text-muted);
+  --amber: #f5c518;
+  
+  /* Apple-inspired typography */
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
+body{
+  background: #000; /* Fallback */
+  color: var(--body);
+  font: 400 16px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+img{display:block;max-width:100%}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;box-shadow:0 0 0 5px rgba(0,113,227,.2)}
+[hidden]{display:none!important}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* Typography Overrides (Removing Serif) */
+h1,h2,h3,.serif{font-family:var(--sans);font-weight:600;color:var(--ink);letter-spacing:-0.5px}
+.d-xl{font-size:clamp(40px,6.4vw,64px);line-height:1.05;letter-spacing:-1.5px;font-weight:700}
+.d-lg{font-size:clamp(34px,4.5vw,48px);line-height:1.1;letter-spacing:-1px;font-weight:700}
+.d-md{font-size:clamp(28px,3.4vw,36px);line-height:1.15;letter-spacing:-0.5px;font-weight:600}
+.d-sm{font-size:28px;line-height:1.2;letter-spacing:-0.3px;font-weight:600}
+.mono{font-family:var(--mono)}
+
+/* Ambient Mesh Background */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #000;
+  overflow: hidden;
+}
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.6;
+  animation: float 20s infinite ease-in-out alternate;
+  will-change: transform;
+}
+.ambient-blob.b1 { width: 60vw; height: 60vw; background: #1c0a3b; top: -10%; left: -10%; }
+.ambient-blob.b2 { width: 50vw; height: 50vw; background: #001a4d; bottom: -10%; right: -10%; animation-delay: -5s; }
+.ambient-blob.b3 { width: 45vw; height: 45vw; background: #052a38; top: 40%; left: 25%; animation-delay: -10s; }
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(10%, 10%) scale(1.15); }
+}
+
+/* Nav: floating full-width liquid glass pill */
+/* Liquid glass: light -45deg / 100%, refraction 100, depth 28, dispersion 40, frost 10, splay 0 */
+.nav{
+  position:absolute;left:50%;top:0;transform:translateX(-50%);height:56px;padding:0 8px;display:flex;align-items:center;gap:4px;pointer-events:auto;
+  border-radius:9999px;
+  background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.01) 50%,rgba(255,255,255,.04));
+  backdrop-filter:blur(6px) saturate(170%);
+  -webkit-backdrop-filter:blur(6px) saturate(170%);
+  box-shadow:
+    inset 0 0 28px rgba(255,255,255,.05),
+    inset 3px 4px 6px -3px rgba(255,255,255,.45),
+    inset -3px -4px 6px -3px rgba(255,255,255,.22),
+    0 10px 30px rgba(0,0,0,.28);
+  overflow:hidden;
+}
+.nav::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(90% 120% at 10% -55%,rgba(255,255,255,.14),transparent 60%)}
+.nav::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 45%),
+    linear-gradient(100deg,rgba(255,255,255,.95),rgba(255,255,255,.1) 18%,rgba(255,255,255,0) 50%,rgba(255,255,255,.1) 82%,rgba(255,255,255,.65));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude}
+.topbar{position:fixed;top:14px;left:0;right:0;z-index:50;height:56px;display:flex;align-items:center;padding:0 28px;pointer-events:none}
+.topbar .brand{pointer-events:auto;position:relative;z-index:2}
+.nav>a{position:relative;z-index:1}
+.topbar .brand,.nav-links a{text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+.brand svg path { fill: var(--primary); }
+.brand-name{font:600 24px/1 var(--sans);letter-spacing:-0.5px}
+.nav-links a{padding:8px 16px;border-radius:9999px;color:var(--text-muted);font:500 14px/1.4 var(--sans);text-decoration:none;transition:all 0.2s}
+.nav-links a:hover{background:rgba(255,255,255,.1);box-shadow:inset 1px 1px 2px -1px rgba(255,255,255,.5);color:var(--text-main)}
+
+/* Buttons & Badges */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 24px;border-radius:9999px;border:1px solid transparent;font:500 15px/1 var(--sans);cursor:pointer;text-decoration:none;transition:all 0.2s var(--ease)}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(0,113,227,0.3)}
+.btn-primary:active{background:var(--primary-active);transform:scale(0.98)}
+.btn-dk{background:rgba(255,255,255,0.1);color:var(--on-dark);border:1px solid var(--glass-border);backdrop-filter: blur(10px);-webkit-backdrop-filter:blur(10px);}
+.btn-dk:hover{background:rgba(255,255,255,0.15)}
+
+.badge{display:inline-block;padding:6px 14px;border-radius:9999px;background:rgba(255,255,255,0.1);border:1px solid var(--glass-border);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--ink);font:500 13px/1.4 var(--sans);white-space:nowrap}
+.badge.coral{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(0,113,227,0.3)}
+.dk .badge,.slice .badge,.banner .badge{background:rgba(255,255,255,0.1);color:var(--on-dark)}
+.dk .badge.coral,.slice .badge.coral,.banner .badge.coral{background:var(--primary);color:#fff}
+.ph{width:100%;height:100%;display:grid;place-items:center;padding:16px;text-align:center;background:var(--glass-bg);color:var(--text-muted);font:500 18px/1.2 var(--sans);letter-spacing:-0.3px;border-radius:inherit}
+.slice .ph,.banner .ph,.vcard .ph{background:var(--dark-el);color:var(--on-dark-soft)}
+
+/* Banner */
+.banner{position:relative;margin:0;width:100%;min-height:660px;height:100svh;border-radius:0;overflow:hidden;background:transparent;color:var(--on-dark)}
+.bg{position:absolute;inset:0;background:transparent}
+.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:fade 1s var(--ease);mask-image:linear-gradient(to bottom, black 50%, transparent 100%);-webkit-mask-image:linear-gradient(to bottom, black 50%, transparent 100%)}
+.bshade{position:absolute;inset:0;background:linear-gradient(90deg, rgba(0,0,0,0.85) 20%, transparent 70%), linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 50%)}
+.bcont{position:absolute;inset:0;padding:64px 48px;display:flex;flex-direction:column;justify-content:flex-end;gap:20px;max-width:760px;transition:opacity .25s,transform .4s var(--ease)}
+.bcont.out{opacity:0;transform:translateY(12px)}
+.bcont h1{color:var(--on-dark)}
+.bcont h1.has-logo{line-height:0}
+.blogo{display:block;max-width:min(520px,100%);max-height:150px;width:auto;height:auto;object-fit:contain;object-position:left bottom;filter:drop-shadow(0 2px 16px rgba(0,0,0,.45));animation:fade .8s var(--ease)}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.bmeta{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:14px;color:var(--text-muted)}
+.cert{border:1px solid var(--glass-border);border-radius:6px;padding:4px 8px;font:500 13px/1.4 var(--sans);color:var(--on-dark);background:rgba(255,255,255,0.05)}
+.bmeta i{font-style:normal;opacity:.4}
+.bsyn{color:var(--text-main);max-width:56ch;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:17px;line-height:1.6}
+.bnext{display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap;margin-top:16px}
+.count{font:300 clamp(44px,6vw,64px)/1 var(--sans);letter-spacing:-2px;font-variant-numeric:tabular-nums;color:var(--on-dark)}
+.count small{display:block;font:500 14px/1.55 var(--sans);letter-spacing:0;color:var(--text-muted);margin-top:8px}
+.times{display:flex;flex-wrap:wrap;gap:10px}
+.chip{font:500 14px/1 var(--sans);padding:12px 18px;border-radius:9999px;background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);color:var(--on-dark)}
+.chip.past{color:var(--muted-soft);text-decoration:line-through;opacity:.5;background:transparent}
+.chip.next{background:var(--primary);color:#fff;border-color:var(--primary)}
+.bthumbs{position:absolute;right:48px;bottom:64px;display:flex;align-items:flex-end;gap:12px;z-index:2}
+.bt{position:relative;flex:none;width:clamp(88px,8.5vw,128px);aspect-ratio:16/10;border-radius:14px;overflow:hidden;padding:0;cursor:pointer;color:var(--on-dark);
+  border:2px solid rgba(255,255,255,.2);background:radial-gradient(120% 120% at 80% 0%,rgba(0,113,227,.35),rgba(255,255,255,.04));opacity:.75;
+  transition:transform .35s var(--ease),border-color .3s,opacity .3s,box-shadow .3s}
+.bt:hover{opacity:1}
+.bt .bk{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bt::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.7),rgba(0,0,0,.05) 70%);z-index:1}
+.bt .lg{position:absolute;z-index:2;left:8px;bottom:8px;max-width:72%;max-height:42%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.6))}
+.bt .tt{position:absolute;z-index:2;left:8px;right:8px;bottom:8px;font:600 11px/1.2 var(--sans);text-align:left;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.bt[aria-selected=true]{opacity:1;border-color:var(--primary);transform:translateY(-6px) scale(1.07);box-shadow:0 0 0 3px rgba(0,113,227,.25),0 12px 28px rgba(0,0,0,.5)}
+.bposter{position:absolute;right:48px;top:50%;transform:translateY(-58%);width:min(280px,22vw);aspect-ratio:2/3;border-radius:24px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.5);border:1px solid var(--glass-border);animation:fade .8s var(--ease)}
+.bposter img{width:100%;height:100%;object-fit:cover}
+@keyframes fade{from{opacity:0}}
+
+/* Sections */
+.sec{padding:96px 0 0}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:40px}
+.sec-head p{max-width:48ch;color:var(--text-muted);font-size:17px}
+.po img,.art img{width:100%;height:100%;object-fit:cover}
+
+/* Strip (Now Showing) */
+.strip{display:flex;gap:18px;height:min(640px,78vh);min-height:480px}
+.slice{position:relative;flex:1 1 0;min-width:0;align-self:center;height:var(--h,70%);transform:translateY(var(--y,0));overflow:hidden;border:0;border-radius:0;padding:0;background:#0b0b0d;cursor:pointer;color:var(--on-dark);
+  transition:flex-grow .8s var(--ease),height .8s var(--ease),transform .8s var(--ease)}
+.slice:nth-child(4n+1){--h:76%;--y:-2%}
+.slice:nth-child(4n+2){--h:62%;--y:7%}
+.slice:nth-child(4n+3){--h:86%;--y:-1%}
+.slice:nth-child(4n+4){--h:68%;--y:5%}
+.slice.on{flex-grow:3;--h:94%;--y:0%}
+.slice .art{position:absolute;inset:0;filter:brightness(.55) saturate(.8);transition:filter .6s,transform .9s var(--ease)}
+.slice.on .art{filter:none;transform:scale(1.04)}
+.slice::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,rgba(0,0,0,.8),rgba(0,0,0,.05) 55%,rgba(0,0,0,.3))}
+.slice .ph span{visibility:hidden}
+.slogo{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%);width:auto;height:auto;max-width:80%;max-height:24%;object-fit:contain;filter:drop-shadow(0 2px 14px rgba(0,0,0,.75));transition:top .7s var(--ease)}
+.slogo.st{font:600 clamp(18px,2vw,26px)/1.1 var(--sans);letter-spacing:-.5px;text-shadow:0 2px 14px rgba(0,0,0,.8);text-align:center;width:80%}
+.slice.on .slogo{top:40%}
+.sd{position:absolute;z-index:2;left:14px;right:14px;bottom:26px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;opacity:0;transform:translateY(14px);transition:opacity .5s .15s,transform .6s .15s var(--ease);pointer-events:none}
+.slice.on .sd{opacity:1;transform:none}
+.sm{font-size:14px;color:var(--on-dark);text-shadow:0 1px 8px rgba(0,0,0,.7)}
+.sh{font-size:12px;color:var(--text-muted)}
+
+/* Fullscreen film view */
+.film{position:fixed;inset:0;z-index:80;background:#000;color:var(--on-dark);overflow:auto;visibility:hidden;clip-path:inset(0);transition:clip-path .75s var(--ease),visibility 0s .75s}
+.film.show{visibility:visible;transition:clip-path .75s var(--ease),visibility 0s}
+.fbg{position:fixed;inset:0;background:radial-gradient(ellipse at 75% 20%,rgba(0,113,227,.3),transparent 55%),#050507}
+.fbg img{width:100%;height:100%;object-fit:cover}
+.fbg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.92) 30%,rgba(0,0,0,.4) 75%,rgba(0,0,0,.25)),linear-gradient(0deg,rgba(0,0,0,.8),transparent 50%)}
+.btn.fclose{position:fixed;top:22px;right:26px;z-index:5;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;height:44px}
+.fin{position:relative;min-height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:end;padding:120px 56px 56px;opacity:0;transition:opacity .4s}
+.film.show .fin{opacity:1;transition-delay:.45s}
+.fl{display:flex;flex-direction:column;gap:18px;align-items:flex-start;max-width:640px}
+.flogo{width:auto;height:auto;max-width:min(520px,100%);max-height:170px;object-fit:contain;object-position:left bottom;filter:drop-shadow(0 2px 16px rgba(0,0,0,.5))}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.fm{font-size:15px;color:var(--text-muted)}
+.syn{color:var(--text-main);font-size:17px;line-height:1.55;max-width:56ch}
+.spec{background:rgba(255,255,255,.06);border:1px solid var(--glass-border);padding:20px 24px;width:100%;max-width:520px}
+.spec b{font-weight:600;color:var(--text-main)}
+.spec .mono{display:block;margin:6px 0 10px;font-size:14px;color:var(--primary)}
+.spec p{font-size:15px;color:var(--text-muted)}
+.mnext{font-size:15px;color:var(--text-muted);font-weight:500}
+.gal{position:relative;min-height:380px;align-self:stretch}
+.gal img{position:absolute;object-fit:cover;opacity:0;transform:translateY(28px);transition:opacity .7s,transform .9s var(--ease)}
+.gal .g1{top:4%;right:2%;width:68%;aspect-ratio:16/9}
+.gal .g2{top:38%;left:0;width:50%;aspect-ratio:16/9}
+.gal .g3{bottom:2%;right:0;width:56%;aspect-ratio:16/9}
+.film.show .gal img{opacity:1;transform:none;transition-delay:.7s}
+.film.show .g2{transition-delay:.85s}.film.show .g3{transition-delay:1s}
+
+/* Screens Band */
+.screens{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:96px}
+.screens>div{border-radius:24px;padding:40px;background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.screens>.dk{background:rgba(255,255,255,0.06);color:var(--text-muted)}
+.screens h3{font-size:28px;letter-spacing:-0.5px;margin:20px 0 12px;font-weight:600;color:var(--text-main)}
+.frame{margin-top:24px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);display:grid;place-items:center;font:500 14px/1 var(--mono);color:var(--text-muted);background:rgba(0,0,0,0.2)}
+.dk .frame{border-color:var(--primary);color:var(--text-main)}
+
+/* Upcoming */
+.soft{padding:96px 0;margin-top:96px} /* Removed solid background, mesh handles it */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.ucard{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);border-radius:24px;padding:20px 20px 28px;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.ucard .po{border-radius:16px;overflow:hidden;aspect-ratio:2/3;background:rgba(255,255,255,0.05);margin-bottom:20px}
+.ucard h3{font:600 20px/1.3 var(--sans);color:var(--text-main);margin:0 0 12px;letter-spacing:-0.3px}
+.ucard p{font-size:15px;color:var(--text-muted);margin-top:16px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Vault */
+.vault{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);border-radius:32px;padding:64px;color:var(--text-muted);box-shadow:0 12px 48px rgba(0,0,0,0.3)}
+.vault h2{color:var(--text-main)}
+.v-top{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:end;margin-bottom:64px}
+.v-top p{margin-top:16px;max-width:50ch;font-size:17px;line-height:1.6}
+.vform{background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:24px;padding:32px}
+.vform label{display:block;font:600 17px/1.4 var(--sans);color:var(--text-main);margin-bottom:16px}
+.vrow{display:flex;gap:12px}
+.in{flex:1;min-width:0;height:42px;padding:10px 16px;border-radius:9999px;border:1px solid var(--glass-border);background:rgba(0,0,0,0.2);color:var(--text-main);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.in:focus{border-color:var(--primary);outline:0;box-shadow:0 0 0 3px rgba(0,113,227,0.3);background:rgba(0,0,0,0.4)}
+.in::placeholder{color:rgba(255,255,255,0.4)}
+#vmsg{min-height:22px;margin-top:16px;font-size:14px;font-weight:500}
+#vmsg.err{color:#ff453a}
+.vlist{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.vcard{position:relative;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:24px;padding:24px;display:grid;grid-template-columns:80px 1fr;gap:20px;transition:transform 0.2s}
+.vcard:hover{background:rgba(255,255,255,0.05)}
+.vcard .thumb{width:80px;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.vcard .thumb img{width:100%;height:100%;object-fit:cover}
+.vcard .thumb .ph{font-size:13px;padding:6px}
+.vcard h3{color:var(--text-main);font:600 17px/1.3 var(--sans);letter-spacing:-0.2px}
+.vcard .yr{font-size:14px;color:var(--text-muted);margin-top:4px}
+.vc{display:flex;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap}
+.vnum{font:300 40px/1 var(--sans);letter-spacing:-1px;color:var(--text-main);font-variant-numeric:tabular-nums;display:inline-block}
+.vnum small{display:block;font:500 13px/1.4 var(--sans);letter-spacing:0;color:var(--text-muted);margin-top:4px}
+.vnum.bump{animation:bump .5s var(--ease)}
+.btn.pulse{animation:pulse .5s var(--ease)}
+.plus{position:absolute;right:32px;bottom:70px;font:600 24px/1 var(--sans);color:var(--primary);pointer-events:none;animation:rise .9s var(--ease) forwards}
+@keyframes bump{40%{transform:translateY(-8px) scale(1.12)}}
+@keyframes pulse{40%{transform:scale(.94)}}
+@keyframes rise{to{transform:translateY(-48px);opacity:0}}
+.vnote{margin-top:40px;font-size:15px;text-align:center}
+
+/* Footer */
+.foot{color:var(--text-muted);font-size:15px;margin-top:128px;padding:64px 0;border-top:1px solid var(--glass-border);background:rgba(0,0,0,0.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.foot .brand-name{color:var(--text-main);font-weight:700}
+.foot p{max-width:64ch;margin-top:16px;line-height:1.6}
+
+@media(max-width:1023px){.grid4{grid-template-columns:repeat(2,1fr)}.vlist{grid-template-columns:repeat(2,1fr)}.bposter{display:none}}
+@media(max-width:767px){
+  .topbar{top:10px;padding:0 14px}
+  .topbar .brand-name{display:none}
+  .nav-links a{padding:8px 10px;font-size:13px}
+  .banner{height:auto;min-height:100svh}
+  .bcont{position:relative;padding:32px 24px;padding-top:160px;min-height:100svh;max-width:none}
+  .bcont{padding-bottom:130px}
+  .bthumbs{left:14px;right:14px;bottom:24px;overflow-x:auto;padding:10px 4px 6px}
+  .bt{width:96px}
+  .strip{flex-direction:column;height:auto;gap:12px}
+  .slice,.slice:nth-child(n){flex:none;height:200px;transform:none}
+  .slice.on{height:300px}
+  .fin{grid-template-columns:1fr;padding:96px 20px 40px}
+  .gal{display:none}
+  .fclose{top:14px;right:14px}
+  .screens,.v-top{grid-template-columns:1fr;gap:32px}
+  .grid4,.vlist{grid-template-columns:1fr}
+  .vault{padding:40px 24px;border-radius:24px}
+  .sec{padding-top:64px}
+  .sec-head{flex-direction:column;align-items:start;margin-bottom:32px}
+  .soft{padding:64px 0;margin-top:64px}
+  .vform{padding:24px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}}
+
+/* Glass rim shared by every pill (light -45deg) */
+.badge,.chip,.btn{position:relative}
+.badge::after,.chip::after,.btn::after,.tile::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 50%),
+    linear-gradient(100deg,rgba(255,255,255,.9),rgba(255,255,255,.08) 22%,rgba(255,255,255,0) 50%,rgba(255,255,255,.08) 78%,rgba(255,255,255,.55));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude}
+
+/* Screen detail view */
+.screens>div[data-screen]{cursor:pointer;transition:transform .3s var(--ease),border-color .3s}
+.screens>div[data-screen]:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.3)}
+.screens .more{display:inline-block;margin-top:20px;font:500 15px/1 var(--sans);color:var(--text-main)}
+.film.scrmode .fbg{background:linear-gradient(rgba(0,70,160,.12),rgba(0,0,0,.9)),repeating-linear-gradient(0deg,rgba(111,168,255,.07) 0 1px,transparent 1px 32px),repeating-linear-gradient(90deg,rgba(111,168,255,.07) 0 1px,transparent 1px 32px),#04070d}
+.film.scrmode .fbg::after{display:none}
+.fin.scr{display:block;max-width:1240px;margin:0 auto;padding:120px 56px 96px}
+.scr-head p{max-width:62ch;margin-top:16px;font-size:18px;color:var(--text-muted)}
+.scr-head .d-xl{margin-top:16px}
+.scr-grid{display:grid;grid-template-columns:1.45fr 1fr;gap:24px;margin-top:48px;align-items:start}
+.bp{border:1px solid rgba(111,168,255,.35);background:rgba(0,50,120,.18);padding:20px}
+.bp .lg{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;font-size:13px;color:var(--text-muted)}
+.bp .lg i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px;background:#6fa8ff}
+.bp .lg i.o{background:none;border:1px dashed #6fa8ff;border-radius:50%}
+.bp .lg i.s{background:rgba(111,168,255,.2);border:1px solid #6fa8ff}
+.bp .lg i.w{background:#fff;height:3px}
+.specs{display:grid;border-top:1px solid var(--glass-border)}
+.specs div{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--glass-border)}
+.specs dt{font-size:14px;color:var(--text-muted)}
+.specs dd{font-size:15px;color:var(--text-main);margin:0}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}
+.tile{position:relative;padding:22px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.01) 55%,rgba(255,255,255,.04));backdrop-filter:blur(6px) saturate(170%);-webkit-backdrop-filter:blur(6px) saturate(170%);box-shadow:inset 0 0 24px rgba(255,255,255,.04),0 10px 28px rgba(0,0,0,.3)}
+.tile b{display:block;font:600 clamp(34px,4vw,52px)/1 var(--sans);letter-spacing:-1.5px;color:var(--text-main)}
+.tile span{font-size:14px;color:var(--text-muted)}
+.cv-head{display:flex;justify-content:space-between;align-items:center;margin:72px 0 20px}
+.cv-head h3{font:600 clamp(24px,3vw,32px)/1.2 var(--sans);letter-spacing:-.5px;color:var(--text-main)}
+.cv-btns{display:flex;gap:8px}
+.cv-btns .btn{width:44px;padding:0}
+.cv{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:4px}
+.cv::-webkit-scrollbar{display:none}
+.cv figure{position:relative;flex:0 0 min(560px,82%);aspect-ratio:16/10;scroll-snap-align:start;margin:0;overflow:hidden;background:linear-gradient(135deg,rgba(0,113,227,.25),rgba(255,255,255,.04));border:1px solid var(--glass-border)}
+.cv img{width:100%;height:100%;object-fit:cover}
+.cv figcaption{position:absolute;left:0;right:0;bottom:0;padding:36px 18px 14px;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent);font-size:14px;color:var(--text-main)}
+.cv .soon{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;color:var(--text-muted);padding-bottom:30px}
+@media(max-width:767px){
+  .fin.scr{padding:96px 20px 64px}
+  .scr-grid{grid-template-columns:1fr}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .specs div{grid-template-columns:100px 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient Animated Mesh Background -->
+<div class="ambient-bg" aria-hidden="true">
+  <div class="ambient-blob b1"></div>
+  <div class="ambient-blob b2"></div>
+  <div class="ambient-blob b3"></div>
+</div>
+
+<svg id="glassdefs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs></defs></svg>
+
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="Encore">
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 8l6 4-6 4z" fill="currentColor"/></svg>
+    <span class="brand-name">Encore</span>
+  </a>
+  <nav class="nav nav-links" aria-label="Sections">
+    <a href="#now">Now Showing</a><a href="#upcoming">Upcoming</a><a href="#vault">Vault</a>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- Landing: full-screen next-show banner -->
+  <section class="banner" id="banner" aria-label="Next show">
+    <div class="bg" id="bbg"></div><div class="bshade"></div>
+    <div class="bposter" id="bposter"></div>
+    <div class="bcont" id="bcont" aria-live="polite"></div>
+    <div class="bthumbs" id="bthumbs" role="tablist" aria-label="Choose a movie"></div>
+  </section>
+
+  <!-- Now showing -->
+  <section class="sec" id="now"><div class="wrap">
+    <div class="sec-head">
+      <h2 class="d-lg">Now showing</h2>
+      <p>Hover a poster for a quick look. Select one for the full story.</p>
+    </div>
+    <div class="strip" id="strip"></div>
+    <div class="screens">
+      <div data-screen="1" role="button" tabindex="0" aria-label="Open Screen 1 technical details">
+        <span class="badge">Standard Digital</span>
+        <h3>Screen 1</h3>
+        <p>4K laser projection with 7.1 surround. Films play in their native frame, either Scope 2.39:1 or Flat 1.85:1.</p>
+        <div class="frame" style="aspect-ratio:2.39/1">2.39:1</div>
+        <span class="more">Blueprint, speakers &amp; photos &rarr;</span>
+      </div>
+      <div class="dk" data-screen="2" role="button" tabindex="0" aria-label="Open Screen 2 EPIQ technical details">
+        <span class="badge coral">EPIQ</span>
+        <h3>Screen 2 · Raedon EPIQ</h3>
+        <p>Our large-format room. Expanded-ratio films fill a taller 1.90:1 frame, with laser projection and immersive audio tuned for the room.</p>
+        <div class="frame" style="aspect-ratio:1.9/1">1.90:1</div>
+        <span class="more">Blueprint, speakers &amp; photos &rarr;</span>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- Upcoming -->
+  <section class="soft" id="upcoming"><div class="wrap">
+    <div class="sec-head">
+      <h2 class="d-lg">Upcoming releases</h2>
+      <p>Dates come from TMDB and can shift. Showtimes appear here once scheduled.</p>
+    </div>
+    <div class="grid4" id="ugrid"></div>
+  </div></section>
+
+  <!-- Vault -->
+  <section class="sec" id="vault"><div class="wrap">
+    <div class="vault">
+      <div class="v-top">
+        <div>
+          <h2 class="d-lg">The Re-Release Vault</h2>
+          <p>Pick the classics you'd like to see on the big screen again. The most requested films get a special Raedon screening.</p>
+        </div>
+        <form class="vform" id="vform" autocomplete="off">
+          <label for="vtitle">Suggest a classic</label>
+          <div class="vrow">
+            <input class="in" id="vtitle" maxlength="80" placeholder="Film title" required>
+            <button class="btn btn-primary" type="submit">Add to vault</button>
+          </div>
+          <p id="vmsg" role="status"></p>
+        </form>
+      </div>
+      <ul class="vlist" id="vlist"></ul>
+      <p class="vnote" id="vnote"></p>
+    </div>
+  </div></section>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <span class="brand-name" style="font-size:28px; letter-spacing: -1px;">Encore</span>
+  <p>A portfolio project for the fictional Raedon Theatre. No tickets are sold here. Re-release requests are stored only in your browser.</p>
+  <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+</div></footer>
+
+<div class="film" id="film" role="dialog" aria-modal="true" aria-label="Movie details">
+  <div class="fbg" id="fbg"></div>
+  <button class="btn fclose" id="fclose" aria-label="Close details">&#10005;&nbsp; Close</button>
+  <div class="fin" id="fin"></div>
+</div>
+
+<script src="config.js"></script>
+<script>
+/* ---------- CONFIG ---------- */
+// Free key: themoviedb.org → Settings → API. Leave empty to run on local data with placeholder posters.
+const IMG = "https://image.tmdb.org/t/p/";
+
+/* ---------- LOCAL THEATRE DATA (edit freely) ---------- */
+const SCREENS = {
+  1: { name: "Screen 1", kind: "Standard Digital", short: "Screen 1", tech: "4K laser projection · 7.1 surround", epiq: false },
+  2: { name: "Screen 2 · Raedon EPIQ", kind: "EPIQ Large Format", short: "Screen 2 · EPIQ", tech: "Large-format laser projection · immersive audio", epiq: true }
+};
+// times: daily, 24h "HH:MM". q: title used to find TMDB data. Local values are fallbacks if TMDB has none.
+const NOW = [
+  { id: "doomsday", q: "Avengers: Doomsday", year: 2026, screen: 2, ratio: "1.90:1 Expanded", genre: "Action · Sci-Fi", runtime: 150, cert: "UA 13+", release: "2026-12-18", langs: ["English", "Hindi", "Tamil", "Telugu"],
+    note: "Shot for the taller frame, so scenes fill the screen top to bottom. Custom bass tuning for the EPIQ room.",
+    synopsis: "The Avengers face their largest threat yet in an event built for the biggest screen in the building.", times: ["14:30", "21:15"] },
+  { id: "odyssey", q: "The Odyssey", year: 2026, screen: 2, ratio: "1.90:1 Expanded", genre: "Adventure · Epic", runtime: 170, cert: "UA 16+", release: "2026-07-17", langs: ["English", "Hindi"],
+    note: "Large-format laser presentation with the expanded frame in key sequences.",
+    synopsis: "Odysseus's ten-year journey home, told at epic scale.", times: ["11:00", "18:00"] },
+  { id: "hailmary", q: "Project Hail Mary", year: 2026, screen: 1, ratio: "2.39:1 Scope", genre: "Sci-Fi · Drama", runtime: 156, cert: "UA 13+", release: "2026-03-20", langs: ["English"],
+    note: "Wide Scope frame with black bars top and bottom on Screen 1.",
+    synopsis: "A lone astronaut wakes with no memory and a mission to save Earth.", times: ["10:00", "15:00", "20:45"] },
+  { id: "spidey", q: "Spider-Man: Brand New Day", year: 2026, screen: 1, ratio: "1.85:1 Flat", genre: "Action · Adventure", runtime: 135, cert: "UA 13+", release: "2026-07-31", langs: ["English", "Hindi", "Malayalam"],
+    note: "Flat 1.85:1 frame, with slightly more height than Scope.",
+    synopsis: "Peter Parker tries to build a quieter life in a city that remembers him.", times: ["12:30", "18:00"] }
+];
+const UPCOMING = [
+  { q: "Dune: Part Three", date: "2026-12-18", blurb: "The saga of Paul Atreides reaches its final chapter." },
+  { q: "Narnia: The Magician's Nephew", date: "2026-11-26", blurb: "Greta Gerwig's take on the origins of Narnia." },
+  { q: "Shrek 5", date: "2027-06-30", blurb: "The ogre returns to the swamp." },
+  { q: "The Batman Part II", date: "2027-10-01", blurb: "Gotham's detective returns." }
+];
+const VAULT_SEED = [["Blade Runner", 1982, 42], ["Spirited Away", 2001, 37], ["2001: A Space Odyssey", 1968, 31], ["Alien", 1979, 24], ["Back to the Future", 1985, 19], ["Akira", 1988, 15]];
+
+/* ---------- HELPERS ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const mins = t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+const fmt12 = t => { const [h, m] = t.split(":").map(Number); return `${h % 12 || 12}:${pad(m)} ${h < 12 ? "AM" : "PM"}`; };
+const hms = s => `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}`;
+const dur = m => `${Math.floor(m / 60)}h ${pad(m % 60)}m`;
+const fdate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+const img = (p, size) => `<img src="${IMG}${size}${p}" alt="" loading="lazy">`;
+const poster = (m, size = "w500") => m.t && m.t.poster ? img(m.t.poster, size) : `<div class="ph"><span>${esc(m.q)}</span></div>`;
+const pill = m => { const s = SCREENS[m.screen]; return `<span class="badge${s.epiq ? " coral" : ""}">${esc(s.short)} · ${esc(m.ratio.split(" ")[0])}</span>`; };
+function view(m) {
+  const t = m.t || {};
+  return {
+    genre: t.genres && t.genres.length ? t.genres.join(" · ") : m.genre,
+    runtime: t.runtime || m.runtime,
+    release: t.release || m.release,
+    langs: t.langs && t.langs.length ? t.langs : m.langs,
+    syn: t.overview || m.synopsis,
+    score: t.score ? `★ ${t.score.toFixed(1)}` : ""
+  };
+}
+
+/* ---------- TMDB ---------- */
+async function tmdb(path, params = {}) {
+  const key = path + JSON.stringify(params);
+  try { const c = sessionStorage.getItem("tm:" + key); if (c) return JSON.parse(c); } catch (e) {}
+  const u = new URL("https://api.themoviedb.org/3" + path);
+  Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v));
+  u.searchParams.set("api_key", TMDB_KEY);
+  const r = await fetch(u); if (!r.ok) throw new Error(r.status);
+  const j = await r.json();
+  try { sessionStorage.setItem("tm:" + key, JSON.stringify(j)); } catch (e) {}
+  return j;
+}
+// Prefer an English title logo (PNG), then language-neutral, highest rated first
+function bestLogo(list) {
+  const ok = (list || []).filter(l => l.file_path && /\.png$/i.test(l.file_path));
+  const rank = l => (l.iso_639_1 === "en" ? 2 : l.iso_639_1 == null ? 1 : 0) * 100 + (l.vote_average || 0);
+  ok.sort((x, y) => rank(y) - rank(x));
+  return ok[0] ? ok[0].file_path : null;
+}
+async function lookup(title, year, light) {
+  if (!TMDB_KEY) return null;
+  try {
+    const s = await tmdb("/search/movie", year ? { query: title, year } : { query: title });
+    const hit = s.results && s.results[0]; if (!hit) return null;
+    if (light) return { poster: hit.poster_path };
+    const d = await tmdb("/movie/" + hit.id, { append_to_response: "images", include_image_language: "en,null" });
+    return {
+      poster: d.poster_path, backdrop: d.backdrop_path, overview: d.overview, runtime: d.runtime,
+      genres: (d.genres || []).map(g => g.name), score: d.vote_average, release: d.release_date,
+      langs: (d.spoken_languages || []).map(l => l.english_name),
+      stills: ((d.images && d.images.backdrops) || []).slice(1, 4).map(b => b.file_path),
+      logo: bestLogo(d.images && d.images.logos)
+    };
+  } catch (e) { return null; }
+}
+
+/* ---------- SHOWTIMES / COUNTDOWN ---------- */
+const state = { open: null, bi: 0 };
+const nowSec = () => { const d = new Date(); return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds(); };
+function nextOf(list, ns) {
+  const shows = list.flatMap(m => m.times.map(t => ({ m, t, sec: mins(t) * 60 }))).sort((a, b) => a.sec - b.sec);
+  const up = shows.find(s => s.sec > ns);
+  if (up) return { ...up, delta: up.sec - ns, tomorrow: false };
+  const f = shows[0];
+  return { ...f, delta: 86400 - ns + f.sec, tomorrow: true };
+}
+// Banner order: soonest next show first, fixed when the page loads
+const ORDER = [...NOW].sort((a, b) => nextOf([a], nowSec()).delta - nextOf([b], nowSec()).delta);
+const firstId = ORDER[0].id;
+
+function tick() {
+  const ns = nowSec();
+  $$(".times").forEach(box => {
+    const m = NOW.find(x => x.id === box.dataset.id), n = nextOf([m], ns);
+    $$(".chip", box).forEach(c => {
+      const v = +c.dataset.m;
+      c.classList.toggle("past", v * 60 <= ns);
+      c.classList.toggle("next", !n.tomorrow && v === mins(n.t));
+    });
+  });
+  NOW.forEach(m => {
+    const n = nextOf([m], ns), el = $(`[data-mnext="${m.id}"]`);
+    if (el) el.textContent = `Next show ${fmt12(n.t)}${n.tomorrow ? " tomorrow" : ""}, in ${hms(n.delta)}`;
+  });
+  const cur = ORDER[state.bi], n = nextOf([cur], ns), c = $("#bcnt");
+  if (c) { c.firstChild.nodeValue = hms(n.delta); $("#bcsub").textContent = `until the ${fmt12(n.t)} show${n.tomorrow ? " tomorrow" : ""}`; }
+}
+
+/* ---------- BANNER ---------- */
+function renderBanner(first) {
+  const m = ORDER[state.bi], v = view(m), t = m.t || {}, s = SCREENS[m.screen];
+  const set = () => {
+    $("#bbg").innerHTML = t.backdrop ? img(t.backdrop, "w1280") : "";
+    $("#bposter").innerHTML = poster(m, "w500");
+    $("#bcont").innerHTML = `
+      <h1 class="d-xl${t.logo ? " has-logo" : ""}">${t.logo ? `<img class="blogo" src="${IMG}w500${t.logo}" alt="${esc(m.q)}" onerror="this.replaceWith(this.alt)">` : esc(m.q)}</h1>
+      <div class="pills"><span class="badge coral">${m.id === firstId ? "Next show" : "Now showing"}</span>${pill(m)}<span class="badge">${esc(s.kind)}</span></div>
+      <div class="bmeta"><span class="cert">${esc(m.cert)}</span><i>|</i><span>${dur(v.runtime)}</span><i>|</i><span>${esc(v.genre)}</span><i>|</i><span>Released ${fdate(v.release)}</span>${v.score ? `<i>|</i><span>${v.score}</span>` : ""}</div>
+      <div class="bmeta"><span>Languages: ${esc(v.langs.join(", "))}</span><i>|</i><span class="mono">${esc(m.ratio)}</span></div>
+      <p class="bsyn">${esc(v.syn)}</p>
+      <div class="bnext">
+        <div class="count" id="bcnt">00:00:00<small id="bcsub"></small></div>
+        <div class="times" data-id="${m.id}">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
+      </div>`;
+    $("#bcont").classList.remove("out");
+    renderThumbs();
+    tick();
+  };
+  if (first) set(); else { $("#bcont").classList.add("out"); setTimeout(set, 250); }
+}
+function goBanner(i) { state.bi = (i + ORDER.length) % ORDER.length; renderBanner(false); }
+function renderThumbs() {
+  $("#bthumbs").innerHTML = ORDER.map((m, i) => {
+    const t = m.t || {};
+    return `<button class="bt" role="tab" data-i="${i}" aria-selected="${i === state.bi}" aria-label="${esc(m.q)}">
+      ${t.backdrop ? `<img class="bk" src="${IMG}w300${t.backdrop}" alt="" loading="lazy">` : ""}
+      ${t.logo ? `<img class="lg" src="${IMG}w185${t.logo}" alt="" loading="lazy">` : `<span class="tt">${esc(m.q)}</span>`}
+    </button>`;
+  }).join("");
+}
+$("#bthumbs").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (b && +b.dataset.i !== state.bi) goBanner(+b.dataset.i); });
+
+/* ---------- NOW SHOWING STRIP ---------- */
+const RM = matchMedia("(prefers-reduced-motion:reduce)").matches;
+state.active = -1;
+function slice(m, i) {
+  const v = view(m), t = m.t || {};
+  return `<button class="slice${state.active === i ? " on" : ""}" data-id="${m.id}" data-i="${i}" aria-label="${esc(m.q)}, open full details">
+    <span class="art">${poster(m, "w780")}</span>
+    ${t.logo ? `<img class="slogo" src="${IMG}w500${t.logo}" alt="">` : `<span class="slogo st">${esc(m.q)}</span>`}
+    <span class="sd">${pill(m)}<span class="sm">${esc(v.genre)} · ${dur(v.runtime)} · ${esc(m.cert)}${v.score ? " · " + v.score : ""}</span><span class="sh">Select for full details</span></span>
+  </button>`;
+}
+function renderStrip() { $("#strip").innerHTML = NOW.map(slice).join(""); tick(); }
+function setActive(i) { state.active = i; $$("#strip .slice").forEach((el, k) => el.classList.toggle("on", k === i)); }
+
+// Auto-play: details appear one movie at a time until the pointer is on the strip
+let paused = false, autoT;
+function auto(delay) {
+  clearTimeout(autoT);
+  if (RM) return;
+  autoT = setTimeout(() => { if (!paused && !state.open) setActive((state.active + 1) % NOW.length); auto(3500); }, delay);
+}
+const strip = $("#strip");
+strip.addEventListener("mouseover", e => { const el = e.target.closest(".slice"); if (el) { paused = true; setActive(+el.dataset.i); } });
+strip.addEventListener("mouseleave", () => { paused = false; auto(2500); });
+strip.addEventListener("focusin", e => { const el = e.target.closest(".slice"); if (el) { paused = true; setActive(+el.dataset.i); } });
+strip.addEventListener("focusout", () => { paused = false; auto(2500); });
+strip.addEventListener("click", e => { const el = e.target.closest(".slice"); if (el) openFilm(el.dataset.id, el); });
+auto(1500);
+
+/* ---------- FULLSCREEN FILM VIEW ---------- */
+function filmHTML(m) {
+  const v = view(m), t = m.t || {}, s = SCREENS[m.screen];
+  const stills = (t.stills || []).map((p, i) => `<img class="g${i + 1}" src="${IMG}w780${p}" alt="" loading="lazy">`).join("");
+  return `<div class="fl">
+      ${t.logo ? `<img class="flogo" src="${IMG}w500${t.logo}" alt="${esc(m.q)}">` : `<h2 class="d-xl">${esc(m.q)}</h2>`}
+      <div class="meta">${pill(m)}<span class="badge">${esc(s.kind)}</span><span class="badge">${esc(m.cert)}</span><span class="badge">${dur(v.runtime)}</span>${v.score ? `<span class="badge">${v.score}</span>` : ""}</div>
+      <p class="fm">${esc(v.genre)} · Released ${fdate(v.release)} · ${esc(v.langs.join(", "))}</p>
+      <p class="syn">${esc(v.syn)}</p>
+      <div class="spec"><b>${esc(s.name)}</b><span class="mono">${esc(m.ratio)}</span><p>${esc(s.tech)}. ${esc(m.note)}</p></div>
+      <div class="times" data-id="${m.id}">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
+      <p class="mnext" data-mnext="${m.id}"></p>
+    </div><div class="gal">${stills}</div>`;
+}
+/* Theatre technical data (demo values, edit freely). Add real photos by setting src to an image path or URL. */
+Object.assign(SCREENS[1], {
+  size: "14.0 m wide", ratios: "Scope 2.39:1 · Flat 1.85:1", projection: "4K RGB laser, single projector", sound: "7.1 surround",
+  rows: 9, cols: 16, best: "Rows E to G, centre block", speakers: { screen: 3, surround: 12, rear: 4, sub: 2, ceiling: 0 },
+  lede: "Our standard digital room. Every film plays in its native frame, with Scope on a wide 2.39:1 canvas and Flat on 1.85:1.",
+  photos: [{ src: "", cap: "Auditorium from the back row" }, { src: "", cap: "Screen and front wall" }, { src: "", cap: "Projection booth" }, { src: "", cap: "Seating rows" }]
+});
+Object.assign(SCREENS[2], {
+  size: "22.0 m × 11.6 m", ratios: "Expanded 1.90:1 · Scope 2.39:1", projection: "Dual 4K laser, native 1.90:1", sound: "Object-based immersive audio",
+  rows: 12, cols: 20, best: "Rows F to H, centre block", speakers: { screen: 5, surround: 20, rear: 6, sub: 4, ceiling: 12 },
+  lede: "Raedon's large-format room. A taller 1.90:1 screen, dual laser projection and overhead speakers tuned for expanded-ratio films.",
+  photos: [{ src: "", cap: "EPIQ screen, full frame" }, { src: "", cap: "Overhead speaker array" }, { src: "", cap: "Dual laser projection booth" }, { src: "", cap: "Seating and sightlines" }]
+});
+
+function blueprint(sc) {
+  const st = "#6fa8ff", sp = sc.speakers, W = 640, H = 440, sx = 120, sw = 400;
+  let o = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Floor plan of ${esc(sc.name)}" style="width:100%;height:auto;display:block"><g fill="none" stroke="${st}" stroke-width="1.2">`;
+  o += `<rect x="20" y="20" width="600" height="400"/>`;
+  o += `<line x1="${sx}" y1="46" x2="${sx + sw}" y2="46" stroke="#fff" stroke-width="5"/>`;
+  o += `<path d="M${sx} 14v-6M${sx + sw} 14v-6M${sx} 11H${sx + sw}" stroke-width="1"/><text x="${W / 2}" y="9" fill="${st}" stroke="none" font-size="10" text-anchor="middle">${esc(sc.size)}</text>`;
+  const box = (x, y, w, h) => `<rect x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" fill="${st}" stroke="none"/>`;
+  for (let i = 0; i < sp.screen; i++) o += box(sx + sw * (i + .5) / sp.screen, 34, 12, 8);
+  const per = sp.surround / 2;
+  for (let i = 0; i < per; i++) { const y = 100 + (240 * i) / Math.max(1, per - 1); o += box(31, y, 8, 10) + box(609, y, 8, 10); }
+  for (let i = 0; i < sp.rear; i++) o += box(120 + 400 * (i + .5) / sp.rear, 409, 10, 8);
+  for (let i = 0; i < sp.sub; i++) o += box(i % 2 ? 560 - 28 * Math.floor(i / 2) : 80 + 28 * Math.floor(i / 2), 70, 18, 18);
+  if (sp.ceiling) { const cols = Math.ceil(sp.ceiling / 2); for (let i = 0; i < sp.ceiling; i++) { const c = i % cols, r = Math.floor(i / cols); o += `<circle cx="${180 + 280 * (c + .5) / cols}" cy="${150 + r * 90}" r="7" stroke-dasharray="3 3"/>`; } }
+  const cw = 16, gap = 28, tw = sc.cols * cw + gap, x0 = W / 2 - tw / 2;
+  for (let r = 0; r < sc.rows; r++) for (let c = 0; c < sc.cols; c++) o += `<rect x="${x0 + c * cw + (c >= sc.cols / 2 ? gap : 0)}" y="${100 + r * 18}" width="12" height="12" rx="2" fill="rgba(111,168,255,.2)"/>`;
+  o += `<rect x="290" y="372" width="60" height="30" stroke-width="1.4"/><text x="320" y="391" fill="${st}" stroke="none" font-size="9" text-anchor="middle">PROJ</text>`;
+  o += `<path d="M300 372L${sx} 48M340 372L${sx + sw} 48" stroke-dasharray="4 5" stroke-width=".8" opacity=".6"/>`;
+  return o + `</g></svg>`;
+}
+function screenHTML(n) {
+  const sc = SCREENS[n], sp = sc.speakers, total = Object.values(sp).reduce((a, b) => a + b, 0), seats = sc.rows * sc.cols;
+  const here = NOW.filter(m => m.screen === n).map(m => `${esc(m.q)} (${esc(m.ratio)})`).join(", ");
+  const photos = sc.photos.map(f => `<figure>${f.src ? `<img src="${esc(f.src)}" alt="${esc(f.cap)}" loading="lazy">` : `<span class="soon">Photo coming soon</span>`}<figcaption>${esc(f.cap)}</figcaption></figure>`).join("");
+  return `<div class="scr-head"><span class="badge${sc.epiq ? " coral" : ""}">${esc(sc.kind)}</span><h2 class="d-xl">${esc(sc.name)}</h2><p>${esc(sc.lede)}</p></div>
+    <div class="tiles"><div class="tile"><b>${total}</b><span>Speakers in total</span></div><div class="tile"><b>${sp.sub}</b><span>Subwoofers</span></div><div class="tile"><b>${sp.ceiling}</b><span>Overhead speakers</span></div><div class="tile"><b>${seats}</b><span>Seats</span></div></div>
+    <div class="scr-grid">
+      <div class="bp">${blueprint(sc)}<div class="lg"><span><i class="w"></i>Screen</span><span><i></i>Speaker</span><span><i class="o"></i>Overhead</span><span><i class="s"></i>Seat</span></div></div>
+      <dl class="specs">
+        <div><dt>Screen</dt><dd>${esc(sc.size)}</dd></div>
+        <div><dt>Aspect ratios</dt><dd class="mono">${esc(sc.ratios)}</dd></div>
+        <div><dt>Projection</dt><dd>${esc(sc.projection)}</dd></div>
+        <div><dt>Sound</dt><dd>${esc(sc.sound)}</dd></div>
+        <div><dt>Speakers</dt><dd>${sp.screen} screen · ${sp.surround} surround · ${sp.rear} rear · ${sp.sub} sub${sp.ceiling ? ` · ${sp.ceiling} overhead` : ""}</dd></div>
+        <div><dt>Best seats</dt><dd>${esc(sc.best)}</dd></div>
+        <div><dt>Playing now</dt><dd>${here || "No films scheduled"}</dd></div>
+      </dl>
+    </div>
+    <div class="cv-head"><h3>Inside the room</h3><div class="cv-btns"><button class="btn" data-cv="-1" aria-label="Previous photo">&larr;</button><button class="btn" data-cv="1" aria-label="Next photo">&rarr;</button></div></div>
+    <div class="cv" id="cv">${photos}</div>`;
+}
+
+const film = $("#film");
+let filmFrom = null;
+const rectClip = el => { const r = el.getBoundingClientRect(); return `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px)`; };
+function openOverlay(key, from, bg, html, cls) {
+  state.open = key; filmFrom = from;
+  $("#fbg").innerHTML = bg;
+  const fin = $("#fin"); fin.className = "fin " + (cls || ""); fin.innerHTML = html;
+  film.classList.toggle("scrmode", cls === "scr");
+  film.scrollTop = 0;
+  film.style.transition = "none"; film.style.clipPath = rectClip(from);
+  void film.offsetWidth;
+  film.style.transition = "";
+  document.documentElement.style.overflow = "hidden";
+  film.classList.add("show"); film.style.clipPath = "inset(0px)";
+  tick();
+  setTimeout(() => $("#fclose").focus({ preventScroll: true }), 500);
+}
+function openFilm(id, from) {
+  const m = NOW.find(x => x.id === id), t = m.t || {};
+  openOverlay(id, from, t.backdrop ? img(t.backdrop, "w1280") : "", filmHTML(m), "");
+}
+function openScreen(n, from) { openOverlay("screen" + n, from, "", screenHTML(n), "scr"); }
+function closeFilm() {
+  if (!state.open) return;
+  state.open = null;
+  film.style.clipPath = filmFrom && document.contains(filmFrom) ? rectClip(filmFrom) : "inset(50% 50% 50% 50%)";
+  film.classList.remove("show");
+  document.documentElement.style.overflow = "";
+  const f = filmFrom; filmFrom = null;
+  if (f && document.contains(f)) f.focus({ preventScroll: true });
+  auto(3000);
+}
+$$(".screens [data-screen]").forEach(el => {
+  el.addEventListener("click", () => openScreen(+el.dataset.screen, el));
+  el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openScreen(+el.dataset.screen, el); } });
+});
+$("#fin").addEventListener("click", e => {
+  const b = e.target.closest("[data-cv]"); if (!b) return;
+  const cv = $("#cv"); cv.scrollBy({ left: +b.dataset.cv * cv.clientWidth * .8, behavior: "smooth" });
+});
+$("#fclose").addEventListener("click", closeFilm);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeFilm(); });
+
+/* ---------- UPCOMING ---------- */
+function renderUpcoming() {
+  $("#ugrid").innerHTML = UPCOMING.map(m => {
+    const rel = (m.t && m.t.release) || m.date, days = Math.ceil((new Date(rel + "T12:00:00") - new Date()) / 864e5);
+    return `<article class="ucard"><div class="po">${poster(m)}</div>
+      <h3>${esc(m.q)}</h3>
+      <span class="badge">${days > 0 ? fdate(rel) : "Out now"}</span>
+      ${days > 0 ? `<span style="font-size:14px;color:var(--muted);margin-left:8px">in ${days} days</span>` : ""}
+      <p>${esc((m.t && m.t.overview) || m.blurb)}</p></article>`;
+  }).join("");
+}
+
+/* ---------- VAULT ---------- */
+const VKEY = "encore.vault.v1", posters = {};
+function loadVault() {
+  try { const j = JSON.parse(localStorage.getItem(VKEY)); if (j && Array.isArray(j.items)) return j; } catch (e) {}
+  return { items: VAULT_SEED.map(([q, year, votes], i) => ({ id: "s" + i, q, year, votes })), voted: {} };
+}
+let vault = loadVault();
+const saveVault = () => { try { localStorage.setItem(VKEY, JSON.stringify(vault)); } catch (e) {} };
+const sorted = () => [...vault.items].sort((a, b) => b.votes - a.votes);
+function vcard(m) {
+  const on = !!vault.voted[m.id];
+  const btnClass = on ? "btn-dk" : "btn-primary";
+  const btnStyle = on ? "border:1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1)" : "";
+  const btnText = on ? "Requested" : "Request re-release";
+  
+  return `<li class="vcard" data-id="${m.id}">
+    <div class="thumb">${poster({ q: m.q, t: posters[m.id] }, "w185")}</div>
+    <div>
+      <h3>${esc(m.q)}</h3>
+      <div class="yr">${m.year ? esc(m.year) : "Suggested by you"}</div>
+      <div class="vc">
+        <span class="vnum"><span class="n">${m.votes}</span><small>requests</small></span>
+        <button class="btn ${btnClass}" data-vote="${m.id}" aria-pressed="${on}" style="${btnStyle}">${btnText}</button>
+      </div>
+    </div>
+  </li>`;
+}
+function updateTotal() { $("#vnote").textContent = `${vault.items.reduce((a, m) => a + m.votes, 0)} requests across ${vault.items.length} films. Counts are saved in this browser only.`; }
+function renderVault() { $("#vlist").innerHTML = sorted().map(vcard).join(""); updateTotal(); vault.items.forEach(fetchPoster); }
+async function fetchPoster(m) {
+  if (posters[m.id] !== undefined) return;
+  posters[m.id] = null;
+  const t = await lookup(m.q, m.year, true);
+  if (t && t.poster) { posters[m.id] = t; const th = $(`.vcard[data-id="${m.id}"] .thumb`); if (th) th.innerHTML = poster({ q: m.q, t }, "w185"); }
+}
+$("#vlist").addEventListener("click", e => {
+  const b = e.target.closest("[data-vote]"); if (!b) return;
+  const m = vault.items.find(x => x.id === b.dataset.vote), card = b.closest(".vcard"), add = !vault.voted[m.id];
+  m.votes += add ? 1 : -1;
+  if (add) vault.voted[m.id] = true; else delete vault.voted[m.id];
+  saveVault();
+  const num = $(".vnum", card); $(".n", card).textContent = m.votes;
+  num.classList.remove("bump"); b.classList.remove("pulse"); void num.offsetWidth; num.classList.add("bump"); b.classList.add("pulse");
+  b.className = "btn " + (add ? "btn-dk" : "btn-primary"); b.style.cssText = add ? "border:1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1)" : "";
+  b.textContent = add ? "Requested" : "Request re-release"; b.setAttribute("aria-pressed", add);
+  if (add) { const p = document.createElement("span"); p.className = "plus"; p.textContent = "+1"; p.setAttribute("aria-hidden", "true"); card.appendChild(p); p.addEventListener("animationend", () => p.remove()); }
+  updateTotal();
+  setTimeout(() => { const l = $("#vlist"); sorted().forEach(x => l.appendChild($(`.vcard[data-id="${x.id}"]`))); }, 700);
+});
+$("#vform").addEventListener("submit", e => {
+  e.preventDefault();
+  const inp = $("#vtitle"), msg = $("#vmsg"), title = inp.value.trim().replace(/\s+/g, " ");
+  msg.className = "";
+  if (!title) { msg.className = "err"; msg.textContent = "Enter a film title to add it."; return; }
+  if (vault.items.some(m => m.q.toLowerCase() === title.toLowerCase())) { msg.className = "err"; msg.textContent = `${title} is already in the vault. Request it from the list below.`; return; }
+  const m = { id: "c" + Date.now(), q: title, year: "", votes: 1 };
+  vault.items.push(m); vault.voted[m.id] = true; saveVault();
+  inp.value = ""; msg.textContent = `Added ${title} with your request.`;
+  renderVault();
+});
+
+/* ---------- INIT ---------- */
+renderBanner(true); renderStrip(); renderUpcoming(); renderVault();
+setInterval(tick, 1000);
+Promise.all(NOW.map(async m => { m.t = await lookup(m.q, m.year); })).then(() => { renderStrip(); renderBanner(true); });
+Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q); })).then(renderUpcoming);
+/* ---------- LIQUID GLASS (Chromium: refraction + dispersion on every pill; other browsers keep the blur fallback) ---------- */
+(function () {
+  if (!/Chrome\/|Chromium\/|Edg\//.test(navigator.userAgent)) return;
+  // Figma Glass: refraction 100, depth 28, dispersion 20, frost 10, splay 0
+  const cfg = { refraction: 100, depth: 28, dispersion: 20, frost: 10 };
+  const NS = "http://www.w3.org/2000/svg", defs = $("#glassdefs defs"), made = new Set();
+  const SEL = ".nav,.badge,.chip,.btn,.in,.tile";
+  const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+
+  function filterFor(W, H, rr) {
+    const id = `lg${W}x${H}r${rr}`;
+    if (made.has(id)) return id;
+    made.add(id);
+    const m0 = Math.min(W, H), depth = Math.min(cfg.depth, m0 / 2), size = Math.min(1, m0 / 56);
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d"), im = g.createImageData(W, H), d = im.data, hx = W / 2, hy = H / 2;
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+      // distance to the (rounded) rectangle edge; works for pills (rr = H/2) and sharp boxes (rr = 0)
+      const px = i + .5 - hx, py = j + .5 - hy, qx = Math.abs(px) - (hx - rr), qy = Math.abs(py) - (hy - rr);
+      const ox = Math.max(qx, 0), oy = Math.max(qy, 0);
+      const inset = -(Math.min(Math.max(qx, qy), 0) + Math.hypot(ox, oy) - rr);
+      let m = 0, nx = 0, ny = 0;
+      if (inset >= 0) {
+        const t = Math.max(0, 1 - inset / depth); m = t * t;
+        let gx, gy; // outward direction
+        if (ox > 0 || oy > 0) { const l = Math.hypot(ox, oy) || 1; gx = Math.sign(px) * ox / l; gy = Math.sign(py) * oy / l; }
+        else if (qx > qy) { gx = Math.sign(px) || 1; gy = 0; } else { gx = 0; gy = Math.sign(py) || 1; }
+        nx = -gx; ny = -gy;
+      }
+      const k = (j * W + i) * 4;
+      d[k] = 128 + nx * m * 127; d[k + 1] = 128 + ny * m * 127; d[k + 2] = 128; d[k + 3] = 255;
+    }
+    g.putImageData(im, 0, 0);
+    const S = cfg.refraction * .5 * size, k = cfg.dispersion / 250;
+    const f = mk("filter", { id, x: 0, y: 0, width: W, height: H, filterUnits: "userSpaceOnUse", "color-interpolation-filters": "sRGB" });
+    const img = mk("feImage", { x: 0, y: 0, width: W, height: H, preserveAspectRatio: "none", result: "map" });
+    img.setAttribute("href", c.toDataURL());
+    f.append(img, mk("feGaussianBlur", { in: "SourceGraphic", stdDeviation: (cfg.frost / 5) * Math.max(.4, size), result: "bl" }));
+    [["1 0 0", 1 + k, "cr"], ["0 1 0", 1, "cg"], ["0 0 1", 1 - k, "cb"]].forEach(([ch, mult, res]) => {
+      f.append(
+        mk("feDisplacementMap", { in: "bl", in2: "map", scale: S * mult, xChannelSelector: "R", yChannelSelector: "G" }),
+        mk("feColorMatrix", { values: `${ch.split(" ")[0]} 0 0 0 0  0 ${ch.split(" ")[1]} 0 0 0  0 0 ${ch.split(" ")[2]} 0 0  0 0 0 1 0`, result: res })
+      );
+    });
+    f.append(mk("feBlend", { in: "cr", in2: "cg", mode: "screen", result: "rg" }), mk("feBlend", { in: "rg", in2: "cb", mode: "screen" }));
+    defs.appendChild(f);
+    return id;
+  }
+  function apply() {
+    $$(SEL).forEach(el => {
+      const W = Math.round(el.offsetWidth), H = Math.round(el.offsetHeight);
+      if (!W || !H) return;
+      const rr = Math.round(Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, W / 2, H / 2));
+      const key = W + "x" + H + "r" + rr;
+      if (el.dataset.gk === key) return;
+      el.dataset.gk = key;
+      const v = `url(#${filterFor(W, H, rr)}) saturate(160%)`;
+      el.style.backdropFilter = v; el.style.webkitBackdropFilter = v;
+    });
+  }
+  let raf = 0;
+  const sched = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; apply(); }); };
+  new MutationObserver(sched).observe(document.body, { childList: true, subtree: true });
+  addEventListener("resize", sched);
+  (document.fonts && document.fonts.ready || Promise.resolve()).then(sched);
+  sched();
+})();
+</script>
+</body>
+</html>
