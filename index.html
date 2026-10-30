@@ -577,6 +577,7 @@ async function lookup(title, year, light) {
 
 /* ---------- SHOWTIMES / COUNTDOWN ---------- */
 const state = { open: null, bi: 0 };
+const RM = matchMedia("(prefers-reduced-motion:reduce)").matches;
 const nowSec = () => { const d = new Date(); return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds(); };
 function nextOf(list, ns) {
   const shows = list.flatMap(m => m.times.map(t => ({ m, t, sec: mins(t) * 60 }))).sort((a, b) => a.sec - b.sec);
@@ -608,6 +609,16 @@ function tick() {
 }
 
 /* ---------- BANNER ---------- */
+let bannerAutoT;
+function startBannerAuto() {
+  clearTimeout(bannerAutoT);
+  if (RM) return;
+  bannerAutoT = setTimeout(() => {
+    if (!state.open) goBanner(state.bi + 1);
+    else startBannerAuto();
+  }, 5000);
+}
+
 function renderBanner(first) {
   const m = ORDER[state.bi], v = view(m), t = m.t || {}, s = SCREENS[m.screen];
   const set = () => {
@@ -615,7 +626,7 @@ function renderBanner(first) {
     $("#bposter").innerHTML = poster(m, "w500");
     $("#bcont").innerHTML = `
       <h1 class="d-xl${t.logo ? " has-logo" : ""}">${t.logo ? `<img class="blogo" src="${IMG}w500${t.logo}" alt="${esc(m.q)}" onerror="this.replaceWith(this.alt)">` : esc(m.q)}</h1>
-      <div class="pills"><span class="badge coral">${m.id === firstId ? "Next show" : "Now showing"}</span>${pill(m)}<span class="badge">${esc(s.kind)}</span></div>
+      <div class="pills">${pill(m)}<span class="badge">${esc(s.kind)}</span></div>
       <div class="bmeta"><span class="cert">${esc(m.cert)}</span><i>|</i><span>${dur(v.runtime)}</span><i>|</i><span>${esc(v.genre)}</span><i>|</i><span>Released ${fdate(v.release)}</span>${v.score ? `<i>|</i><span>${v.score}</span>` : ""}</div>
       <div class="bmeta"><span>Languages: ${esc(v.langs.join(", "))}</span><i>|</i><span class="mono">${esc(m.ratio)}</span></div>
       <p class="bsyn">${esc(v.syn)}</p>
@@ -626,6 +637,7 @@ function renderBanner(first) {
     $("#bcont").classList.remove("out");
     renderThumbs();
     tick();
+    startBannerAuto();
   };
   if (first) set(); else { $("#bcont").classList.add("out"); setTimeout(set, 250); }
 }
@@ -639,10 +651,9 @@ function renderThumbs() {
     </button>`;
   }).join("");
 }
-$("#bthumbs").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (b && +b.dataset.i !== state.bi) goBanner(+b.dataset.i); });
+$("#bthumbs").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (b && +b.dataset.i !== state.bi) { clearTimeout(bannerAutoT); goBanner(+b.dataset.i); } });
 
 /* ---------- NOW SHOWING STRIP ---------- */
-const RM = matchMedia("(prefers-reduced-motion:reduce)").matches;
 state.active = -1;
 function slice(m, i) {
   const v = view(m), t = m.t || {};
