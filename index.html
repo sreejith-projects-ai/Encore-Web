@@ -90,7 +90,6 @@ h1,h2,h3,.serif{font-family:var(--sans);font-weight:600;color:var(--ink);letter-
 }
 
 /* Nav: floating full-width liquid glass pill */
-/* Liquid glass: light -45deg / 100%, refraction 100, depth 28, dispersion 40, frost 10, splay 0 */
 .nav{
   position:absolute;left:50%;top:0;transform:translateX(-50%);height:56px;padding:0 8px;display:flex;align-items:center;gap:4px;pointer-events:auto;
   border-radius:9999px;
@@ -278,32 +277,6 @@ h1,h2,h3,.serif{font-family:var(--sans);font-weight:600;color:var(--ink);letter-
 .foot .brand-name{color:var(--text-main);font-weight:700}
 .foot p{max-width:64ch;margin-top:16px;line-height:1.6}
 
-@media(max-width:1023px){.grid4{grid-template-columns:repeat(2,1fr)}.vlist{grid-template-columns:repeat(2,1fr)}.bposter{display:none}}
-@media(max-width:767px){
-  .topbar{top:10px;padding:0 14px}
-  .topbar .brand-name{display:none}
-  .nav-links a{padding:8px 10px;font-size:13px}
-  .banner{height:auto;min-height:100svh}
-  .bcont{position:relative;padding:32px 24px;padding-top:160px;min-height:100svh;max-width:none}
-  .bcont{padding-bottom:130px}
-  .bthumbs{left:14px;right:14px;bottom:24px;overflow-x:auto;padding:10px 4px 6px}
-  .bt{width:96px}
-  .strip{flex-direction:column;height:auto;gap:12px}
-  .slice,.slice:nth-child(n){flex:none;height:200px;transform:none}
-  .slice.on{height:300px}
-  .fin{grid-template-columns:1fr;padding:96px 20px 40px}
-  .gal{display:none}
-  .fclose{top:14px;right:14px}
-  .screens,.v-top{grid-template-columns:1fr;gap:32px}
-  .grid4,.vlist{grid-template-columns:1fr}
-  .vault{padding:40px 24px;border-radius:24px}
-  .sec{padding-top:64px}
-  .sec-head{flex-direction:column;align-items:start;margin-bottom:32px}
-  .soft{padding:64px 0;margin-top:64px}
-  .vform{padding:24px}
-}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}}
-
 /* Glass rim shared by every pill (light -45deg) */
 .badge,.chip,.btn{position:relative}
 .badge::after,.chip::after,.btn::after,.tile::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
@@ -346,12 +319,66 @@ h1,h2,h3,.serif{font-family:var(--sans);font-weight:600;color:var(--ink);letter-
 .cv img{width:100%;height:100%;object-fit:cover}
 .cv figcaption{position:absolute;left:0;right:0;bottom:0;padding:36px 18px 14px;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent);font-size:14px;color:var(--text-main)}
 .cv .soon{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;color:var(--text-muted);padding-bottom:30px}
+
+/* ====== MOBILE OPTIMIZATION ====== */
+@media(max-width:1023px){.grid4{grid-template-columns:repeat(2,1fr)}.vlist{grid-template-columns:repeat(2,1fr)}.bposter{display:none}}
 @media(max-width:767px){
-  .fin.scr{padding:96px 20px 64px}
+  /* Clean App-like Header */
+  .topbar{top:12px;padding:0 12px;justify-content:center}
+  .topbar .brand{display:none}
+  .nav{position:relative;left:auto;transform:none;width:100%;max-width:360px;justify-content:space-evenly;padding:0 4px}
+  .nav-links a{padding:8px 12px;font-size:13px}
+  
+  /* Full-bleed responsive Banner */
+  .banner{height:auto;min-height:100svh;display:flex;flex-direction:column}
+  .bcont{position:relative;padding:100px 20px 20px;min-height:auto;flex:1;justify-content:center;max-width:none}
+  
+  /* Horizontal scrolling thumbnails for mobile */
+  .bthumbs{position:relative;left:auto;right:auto;bottom:auto;padding:16px 20px 24px;width:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;display:flex;gap:12px;-webkit-overflow-scrolling:touch}
+  .bthumbs::-webkit-scrollbar{display:none}
+  .bt{width:110px;flex:none;scroll-snap-align:start}
+  
+  /* Compact Now Showing Stack */
+  .strip{flex-direction:column;height:auto;gap:8px}
+  .slice,.slice:nth-child(n){flex:none;height:120px;transform:none;border-radius:16px}
+  .slice.on{height:380px}
+  
+  /* Film Modals */
+  .fin{grid-template-columns:1fr;padding:80px 20px 40px;gap:24px}
+  .gal{display:none} /* Hide large desktop stills */
+  .fclose{top:12px;right:12px;height:38px;padding:0 16px;font-size:13px}
+  
+  /* Screens detailed breakdown */
+  .screens,.v-top{grid-template-columns:1fr;gap:24px}
+  .screens > div{padding:24px;border-radius:20px}
   .scr-grid{grid-template-columns:1fr}
-  .tiles{grid-template-columns:repeat(2,1fr)}
-  .specs div{grid-template-columns:100px 1fr}
+  .tiles{grid-template-columns:repeat(2,1fr);gap:10px}
+  .tile{padding:16px;border-radius:12px}
+  .tile b{font-size:24px}
+  .specs div{grid-template-columns:100px 1fr;padding:12px 0}
+  
+  /* Upcoming & Vault grids */
+  .grid4{grid-template-columns:repeat(2,1fr);gap:16px}
+  .ucard{padding:16px;border-radius:16px}
+  .ucard h3{font-size:16px}
+  .ucard p{font-size:13px;margin-top:12px}
+  
+  .vault{padding:32px 20px;border-radius:20px}
+  .vlist{grid-template-columns:1fr;gap:16px}
+  .vform{padding:20px;border-radius:16px}
+  .vrow{flex-direction:column}
+  .vcard{padding:16px;grid-template-columns:70px 1fr;gap:16px;border-radius:16px}
+  .vcard .thumb{width:70px}
+  .vcard h3{font-size:15px}
+  .vnum{font-size:32px}
+  
+  /* Section spacing */
+  .sec{padding-top:64px}
+  .sec-head{flex-direction:column;align-items:start;margin-bottom:24px}
+  .soft{padding:64px 0;margin-top:64px}
+  .foot{margin-top:64px;padding:40px 20px}
 }
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}}
 </style>
 </head>
 <body>
