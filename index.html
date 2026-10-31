@@ -229,7 +229,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .film.show .fin{opacity:1;transition-delay:.45s}
 .fl{display:flex;flex-direction:column;gap:18px;align-items:flex-start;max-width:640px}
 .d-only-f{display:flex;flex-direction:column;gap:18px;align-items:flex-start;width:100%}
-.m-only-f{display:none}
+.m-only-f, .m-only-sec{display:none}
 @media (min-width: 768px) {
   .desk-hide-fx { display: none !important; }
 }
@@ -415,6 +415,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   .fbg::after{background:linear-gradient(0deg,rgba(0,0,0,.97) 38%,rgba(0,0,0,.55) 70%,rgba(0,0,0,.3))}
   .d-only-f{display:none}
   .m-only-f{display:flex;flex-direction:column;align-items:flex-start;gap:14px;width:100%;text-align:left}
+  .m-only-sec{display:block}
   .fx .times{justify-content:flex-start}
   .syn-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%}
   .clamp-mob{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0}
@@ -692,6 +693,7 @@ async function lookup(title, year, light) {
       langs: (d.spoken_languages || []).map(l => l.english_name),
       gallery: [...new Set((backs.length ? backs : im.backdrops || []).map(b => b.file_path))].filter(f => f !== (backs[0] ? backs[0].file_path : d.backdrop_path)).slice(0, 10),
       director: ((d.credits && d.credits.crew) || []).filter(c => c.job === "Director").map(c => c.name).join(", "),
+      directors: ((d.credits && d.credits.crew) || []).filter(c => c.job === "Director").map(c => ({ name: c.name, photo: c.profile_path })),
       cast: ((d.credits && d.credits.cast) || []).slice(0, 12).map(c => ({ name: c.name, role: c.character, photo: c.profile_path })),
       logo: bestLogo(im.logos)
     };
@@ -814,9 +816,16 @@ function filmHTML(m) {
   const v = view(m), t = m.t || {}, s = SCREENS[m.screen];
   const cast = (t.cast || []).map(c => `<div class="cm"><div class="ph2">${c.photo ? img(c.photo, "w185") : `<span>${esc(c.name.charAt(0))}</span>`}</div><b>${esc(c.name)}</b><span>${esc(c.role || "")}</span></div>`).join("");
   const gal = (t.gallery || []).map(p => `<figure><img src="${IMG}w780${p}" alt="" loading="lazy"></figure>`).join("");
+  const dirs = (t.directors || []).map(c => `<div class="cm"><div class="ph2">${c.photo ? img(c.photo, "w185") : `<span>${esc(c.name.charAt(0))}</span>`}</div><b>${esc(c.name)}</b></div>`).join("");
   
-  const detailsHtml = `
+  const detailsHtmlDesk = `
       ${t.director ? `<p class="fm">Directed by <b>${esc(t.director)}</b></p>` : ""}
+      <div class="syn-wrap"><p class="syn">${esc(v.syn)}</p></div>
+      <div class="times" data-id="${m.id}">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
+      <p class="mnext" data-mnext="${m.id}"></p>
+  `;
+
+  const detailsHtmlMob = `
       <div class="syn-wrap"><p class="syn clamp-mob">${esc(v.syn)}</p><span class="btn-more m-only" data-more-syn>Show more</span></div>
       <div class="times" data-id="${m.id}">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
       <p class="mnext" data-mnext="${m.id}"></p>
@@ -826,10 +835,11 @@ function filmHTML(m) {
       ${t.logo ? `<img class="flogo" src="${IMG}w500${t.logo}" alt="${esc(m.q)}">` : `<h2 class="d-xl">${esc(m.q)}</h2>`}
       <div class="meta">${pill(m)}<span class="badge">${esc(s.kind)}</span><span class="badge">${esc(m.cert)}</span><span class="badge">${dur(v.runtime)}</span>${v.score ? `<span class="badge">${v.score}</span>` : ""}</div>
       <p class="fm">${esc(v.genre)} · Released ${fdate(v.release)} · ${esc(v.langs.join(", "))}</p>
-      <div class="d-only-f">${detailsHtml}</div>
+      <div class="d-only-f">${detailsHtmlDesk}</div>
     </div></div>
-    <div class="fx ${!cast && !gal ? 'desk-hide-fx' : ''}">
-      <div class="m-only-f">${detailsHtml}</div>
+    <div class="fx ${!cast && !gal && !dirs ? 'desk-hide-fx' : ''}">
+      <div class="m-only-f">${detailsHtmlMob}</div>
+      ${dirs ? `<section class="m-only-sec"><h3 class="xh">${t.directors && t.directors.length > 1 ? 'Directors' : 'Director'}</h3><div class="cast">${dirs}</div></section>` : ""}
       ${cast ? `<section><h3 class="xh">Cast</h3><div class="cast">${cast}</div></section>` : ""}
       ${gal ? `<section><div class="cv-head"><h3 class="xh">Gallery</h3><div class="cv-btns"><button class="btn" data-cv="-1" aria-label="Previous image">&larr;</button><button class="btn" data-cv="1" aria-label="Next image">&rarr;</button></div></div><div class="cv" id="cv">${gal}</div></section>` : ""}
     </div>`;
