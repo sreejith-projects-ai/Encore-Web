@@ -151,9 +151,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .btn-dk:hover{background:rgba(255,255,255,0.15)}
 
 .badge{display:inline-block;padding:6px 14px;border-radius:9999px;background:rgba(255,255,255,0.1);border:1px solid var(--glass-border);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--ink);font:500 13px/1.4 var(--sans);white-space:nowrap}
-.badge.coral{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(0,113,227,0.3)}
 .dk .badge,.slice .badge,.banner .badge{background:rgba(255,255,255,0.1);color:var(--on-dark)}
-.dk .badge.coral,.slice .badge.coral,.banner .badge.coral{background:var(--primary);color:#fff}
 .ph{width:100%;height:100%;display:grid;place-items:center;padding:16px;text-align:center;background:var(--glass-bg);color:var(--text-muted);font:500 18px/1.2 var(--sans);letter-spacing:-0.3px;border-radius:inherit}
 .slice .ph,.banner .ph,.vcard .ph{background:var(--dark-el);color:var(--on-dark-soft)}
 
@@ -164,7 +162,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .bshade{position:absolute;inset:0;background:linear-gradient(90deg, rgba(0,0,0,0.85) 20%, transparent 70%), linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 50%)}
 .bcont{position:absolute;inset:0;padding:64px 48px;display:flex;flex-direction:column;justify-content:flex-end;gap:20px;max-width:760px;transition:opacity .25s,transform .4s var(--ease)}
 .bcont.out{opacity:0;transform:translateY(12px)}
-.bcont h1{color:var(--on-dark)}
+.bcont h1{color:var(--on-dark);margin-bottom:16px}
 .bcont h1.has-logo{line-height:0}
 .blogo{display:block;max-width:min(520px,100%);max-height:150px;width:auto;height:auto;object-fit:contain;object-position:left bottom;filter:drop-shadow(0 2px 16px rgba(0,0,0,.45));animation:fade .8s var(--ease)}
 .pills{display:flex;flex-wrap:wrap;gap:8px}
@@ -194,7 +192,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 @keyframes fade{from{opacity:0}}
 
 /* Sections */
-.sec{padding:48px 0 0}
+.sec{padding:96px 0 0}
 .sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:40px}
 .sec-head p{max-width:48ch;color:var(--text-muted);font-size:17px}
 .po img,.art img{width:100%;height:100%;object-fit:cover}
@@ -368,7 +366,8 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   .bg img{-webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 98%);mask-image:linear-gradient(to bottom,#000 55%,transparent 98%);object-position:50% 20%}
   .bshade{background:linear-gradient(0deg,rgba(0,0,0,.96) 20%,rgba(0,0,0,.6) 48%,rgba(0,0,0,.1) 78%,rgba(0,0,0,.35))}
   .bcont{position:relative;inset:auto;flex:none;padding:0 20px 6px;gap:12px;min-height:0;max-width:none;justify-content:flex-end;z-index:2;align-items:center;text-align:center}
-  .blogo{max-height:64px;max-width:62%;margin:0 auto}
+  .blogo{max-height:100px;max-width:85%;margin:0 auto}
+  .bcont h1{margin-bottom:8px}
   .bcont h1:not(.has-logo){font-size:32px;line-height:1.1}
   .bsyn,.hm{display:none}
   .pills{justify-content:center}
@@ -448,7 +447,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   .vcard .vc .btn{flex:1;height:44px;font-size:13px;padding:0 12px}
   
   /* Section spacing */
-  .sec{padding-top:32px}
+  .sec{padding-top:80px}
   .sec-head{flex-direction:column;align-items:center;margin-bottom:20px;gap:8px}
   .soft{padding:32px 0;margin-top:32px}
   .foot{margin-top:48px;padding:40px 20px}
@@ -537,7 +536,7 @@ h1,h2,h3,.d-xl,.d-lg,.d-md,.d-sm,.brand-name,.fx .xh,.cv-head h3,.slogo.st,.bt .
         <span class="more">Blueprint, speakers &amp; photos &rarr;</span>
       </div>
       <div class="dk" data-screen="2" role="button" tabindex="0" aria-label="Open Screen 2 EPIQ technical details">
-        <span class="badge coral">EPIQ</span>
+        <span class="badge">EPIQ</span>
         <h3>Screen 2 · Raedon EPIQ</h3>
         <p>Our large-format room. Expanded-ratio films fill a taller 1.90:1 frame, with laser projection and immersive audio tuned for the room.</p>
         <div class="frame" style="aspect-ratio:1.9/1">1.90:1</div>
@@ -630,7 +629,7 @@ const dur = m => `${Math.floor(m / 60)}h ${pad(m % 60)}m`;
 const fdate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 const img = (p, size) => `<img src="${IMG}${size}${p}" alt="" loading="lazy">`;
 const poster = (m, size = "w500") => m.t && m.t.poster ? img(m.t.poster, size) : `<div class="ph"><span>${esc(m.q)}</span></div>`;
-const pill = m => { const s = SCREENS[m.screen]; return `<span class="badge${s.epiq ? " coral" : ""}">${esc(s.short)} · ${esc(m.ratio.split(" ")[0])}</span>`; };
+const pill = m => { const s = SCREENS[m.screen]; return `<span class="badge">${esc(s.short)} · ${esc(m.ratio.split(" ")[0])}</span>`; };
 function view(m) {
   const t = m.t || {};
   return {
@@ -740,7 +739,7 @@ function renderBanner(first) {
     $("#bcont").innerHTML = `
       <h1 class="d-xl${t.logo ? " has-logo" : ""}">${t.logo ? `<img class="blogo" src="${IMG}w500${t.logo}" alt="${esc(m.q)}" onerror="this.replaceWith(this.alt)">` : esc(m.q)}</h1>
       <div class="pills">${pill(m)}<span class="badge hm">${esc(s.kind)}</span></div>
-      <div class="bmeta"><span class="cert">${esc(m.cert)}</span><i>|</i><span>${dur(v.runtime)}</span><i>|</i><span>${esc(v.genre)}</span><i class="hm">|</i><span class="hm">Released ${fdate(v.release)}</span>${v.score ? `<i>|</i><span>${v.score}</span>` : ""}</div>
+      <div class="bmeta"><span class="cert">${esc(m.cert)}</span><i>|</i><span>${dur(v.runtime)}</span><i>|</i><span>${esc(v.genre)}</span><i class="hm">|</i><span class="hm">Released ${fdate(v.release)}</span></div>
       <div class="bmeta hm"><span>Languages: ${esc(v.langs.join(", "))}</span><i>|</i><span class="mono">${esc(m.ratio)}</span></div>
       <p class="bsyn">${esc(v.syn)}</p>
       <div class="bnext">
@@ -857,7 +856,7 @@ function screenHTML(n) {
   const sc = SCREENS[n], sp = sc.speakers, total = Object.values(sp).reduce((a, b) => a + b, 0), seats = sc.rows * sc.cols;
   const here = NOW.filter(m => m.screen === n).map(m => `${esc(m.q)} (${esc(m.ratio)})`).join(", ");
   const photos = sc.photos.map(f => `<figure>${f.src ? `<img src="${esc(f.src)}" alt="${esc(f.cap)}" loading="lazy">` : `<span class="soon">Photo coming soon</span>`}<figcaption>${esc(f.cap)}</figcaption></figure>`).join("");
-  return `<div class="scr-head"><span class="badge${sc.epiq ? " coral" : ""}">${esc(sc.kind)}</span><h2 class="d-xl">${esc(sc.name)}</h2><p>${esc(sc.lede)}</p></div>
+  return `<div class="scr-head"><span class="badge">${esc(sc.kind)}</span><h2 class="d-xl">${esc(sc.name)}</h2><p>${esc(sc.lede)}</p></div>
     <div class="tiles"><div class="tile"><b>${total}</b><span>Speakers in total</span></div><div class="tile"><b>${sp.sub}</b><span>Subwoofers</span></div><div class="tile"><b>${sp.ceiling}</b><span>Overhead speakers</span></div><div class="tile"><b>${seats}</b><span>Seats</span></div></div>
     <div class="scr-grid">
       <div class="bp">${blueprint(sc)}<div class="lg"><span><i class="w"></i>Screen</span><span><i></i>Speaker</span><span><i class="o"></i>Overhead</span><span><i class="s"></i>Seat</span></div></div>
