@@ -94,8 +94,8 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 }
 
 /* Nav: floating full-width liquid glass pill */
-.nav{
-  position:absolute;left:50%;top:0;transform:translateX(-50%);height:56px;padding:0 10px;display:flex;align-items:center;gap:4px;pointer-events:auto;
+.glass{
+  position:relative;border:0;color:var(--text-main);
   border-radius:9999px;
   background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.01) 50%,rgba(255,255,255,.04));
   backdrop-filter:blur(6px) saturate(170%);
@@ -107,24 +107,41 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
     0 10px 30px rgba(0,0,0,.28);
   overflow:hidden;
 }
-.nav::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:radial-gradient(90% 120% at 10% -55%,rgba(255,255,255,.14),transparent 60%)}
-.nav::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;
   background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 45%),
     linear-gradient(100deg,rgba(255,255,255,.95),rgba(255,255,255,.1) 18%,rgba(255,255,255,0) 50%,rgba(255,255,255,.1) 82%,rgba(255,255,255,.65));
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
   -webkit-mask-composite:xor;mask-composite:exclude}
-.topbar{position:fixed;top:14px;left:0;right:0;z-index:50;height:56px;display:flex;align-items:center;padding:0 28px;pointer-events:none}
+.topbar{position:fixed;top:14px;left:0;right:0;z-index:50;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;pointer-events:none}
 .topbar .brand{pointer-events:auto;position:relative;z-index:2}
-.nav>a{position:relative;z-index:1}
-.topbar .brand,.nav-links a{text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.topbar{transition:transform .45s var(--ease)}
+.topbar.hide{transform:translateY(-120px)}
+.topbar.hide .brand,.topbar.hide .menu{pointer-events:none}
+.glass>*{position:relative;z-index:1}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
 .logo{display:block;width:auto;height:20.4px}
 .foot .logo{height:18px}
 .topbar .logo{filter:drop-shadow(0 1px 8px rgba(0,0,0,.35))}
 .brand-name{font:600 24px/1 var(--display);letter-spacing:-0.5px}
-.nav-links a{padding:8px 16px;border-radius:9999px;color:var(--text-muted);font:500 14px/1.4 var(--sans);text-decoration:none;transition:all 0.2s}
-.nav-links a:hover{background:rgba(255,255,255,.1);box-shadow:inset 1px 1px 2px -1px rgba(255,255,255,.5);color:var(--text-main)}
+/* Hamburger: small icon-only glass circle; each link is its own glass pill */
+.menu{position:relative;pointer-events:auto}
+.menu-btn{display:grid;place-items:center;width:44px;height:44px;padding:0;cursor:pointer}
+.menu-btn svg{width:18px;height:18px;overflow:visible}
+.menu-btn line{stroke:currentColor;stroke-width:2;stroke-linecap:round;transform-box:fill-box;transform-origin:center;transition:transform .35s var(--ease),opacity .2s}
+.menu-btn[aria-expanded=true] .l1{transform:translateY(6px) rotate(45deg)}
+.menu-btn[aria-expanded=true] .l2{opacity:0}
+.menu-btn[aria-expanded=true] .l3{transform:translateY(-6px) rotate(-45deg)}
+.menu-panel{position:absolute;top:0;right:calc(100% + 10px);height:44px;display:flex;align-items:center;gap:8px;visibility:hidden;transition:visibility 0s .45s}
+.menu-panel.open{visibility:visible;transition:none}
+.menu-panel a{display:flex;align-items:center;height:44px;padding:0 20px;white-space:nowrap;color:var(--text-main);font:500 14px/1 var(--sans);text-decoration:none;text-shadow:0 1px 8px rgba(0,0,0,.35);
+  opacity:0;transform:translateX(28px) scale(.8);transform-origin:right center;pointer-events:none;transition:opacity .25s,transform .45s var(--ease)}
+.menu-panel.open a{opacity:1;transform:none;pointer-events:auto}
+.menu-panel.open a:nth-child(3){transition-delay:0s}
+.menu-panel.open a:nth-child(2){transition-delay:.06s}
+.menu-panel.open a:nth-child(1){transition-delay:.12s}
+.menu-panel a:hover,.menu-panel a:focus-visible{background:rgba(255,255,255,.14)}
 
 /* Buttons & Badges */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 24px;border-radius:9999px;border:1px solid transparent;font:500 15px/1 var(--sans);cursor:pointer;text-decoration:none;transition:all 0.2s var(--ease)}
@@ -337,10 +354,12 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .m-only,.bmore,.hm{display:none}
 @media(max-width:767px){
   /* Header */
-  .topbar{top:12px;padding:0 12px;justify-content:center}
-  .topbar .brand{display:none}
-  .nav{position:relative;left:auto;transform:none;width:100%;max-width:360px;justify-content:space-evenly;padding:0 4px}
-  .nav-links a{padding:11px 12px;font-size:13px}
+  .topbar{top:12px;padding:0 16px}
+  .menu-panel{top:calc(100% + 10px);right:0;height:auto;flex-direction:column;align-items:flex-end}
+  .menu-panel a{transform:translateY(-14px) scale(.85);transform-origin:top right}
+  .menu-panel.open a:nth-child(1){transition-delay:0s}
+  .menu-panel.open a:nth-child(2){transition-delay:.06s}
+  .menu-panel.open a:nth-child(3){transition-delay:.12s}
   .btn{min-height:44px}
   .d-only{display:none}.m-only{display:inline}
 
@@ -462,9 +481,14 @@ h1,h2,h3,.d-xl,.d-lg,.d-md,.d-sm,.brand-name,.fx .xh,.cv-head h3,.slogo.st,.bt .
   <a class="brand" href="#top" aria-label="Encore">
     <svg class="logo" width="112" height="20.4" viewBox="0 0 368 67" role="img" aria-label="Encore"><use href="#encore-logo"/></svg>
   </a>
-  <nav class="nav nav-links" aria-label="Sections">
-    <a href="#now">Now Showing</a><a href="#upcoming">Upcoming</a><a href="#vault">Vault</a>
-  </nav>
+  <div class="menu" id="menu">
+    <button class="glass menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="menuPanel">
+      <svg viewBox="0 0 22 22" aria-hidden="true"><line class="l1" x1="3" y1="5" x2="19" y2="5"/><line class="l2" x1="3" y1="11" x2="19" y2="11"/><line class="l3" x1="3" y1="17" x2="19" y2="17"/></svg>
+    </button>
+    <nav class="menu-panel" id="menuPanel" aria-label="Sections">
+      <a class="glass" href="#now">Now Showing</a><a class="glass" href="#upcoming">Upcoming</a><a class="glass" href="#vault">Vault</a>
+    </nav>
+  </div>
 </header>
 
 <main id="top">
@@ -898,7 +922,7 @@ function renderUpcoming() {
   $("#ugrid").innerHTML = UPCOMING.map(m => {
     const rel = (m.t && m.t.release) || m.date, days = Math.ceil((new Date(rel + "T12:00:00") - new Date()) / 864e5);
     return `<article class="ucard"><div class="po">${poster(m)}</div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;text-align:center">
         <span class="badge">${days > 0 ? fdate(rel) : "Out now"}</span>
         ${days > 0 ? `<span style="font-size:14px;color:var(--text-muted)">in ${days} days</span>` : ""}
       </div></article>`;
@@ -977,7 +1001,7 @@ Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q); })).then(renderUp
   // Figma Glass: refraction 100, depth 28, dispersion 20, frost 10, splay 0
   const cfg = { refraction: 100, depth: 28, dispersion: 20, frost: 10 };
   const NS = "http://www.w3.org/2000/svg", defs = $("#glassdefs defs"), made = new Set();
-  const SEL = ".nav,.badge,.chip,.btn,.in,.tile";
+  const SEL = ".glass,.badge,.chip,.btn,.in,.tile";
   const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
 
   function filterFor(W, H, rr) {
@@ -1037,6 +1061,32 @@ Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q); })).then(renderUp
   addEventListener("resize", sched);
   (document.fonts && document.fonts.ready || Promise.resolve()).then(sched);
   sched();
+})();
+/* ---------- HAMBURGER MENU ---------- */
+(function () {
+  const btn = $("#menuBtn"), panel = $("#menuPanel");
+  const set = open => { panel.classList.toggle("open", open); btn.setAttribute("aria-expanded", open); btn.setAttribute("aria-label", open ? "Close menu" : "Open menu"); };
+  btn.addEventListener("click", () => set(!panel.classList.contains("open")));
+  panel.addEventListener("click", e => { if (e.target.closest("a")) set(false); });
+  document.addEventListener("click", e => { if (!e.target.closest("#menu")) set(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && panel.classList.contains("open")) { set(false); btn.focus(); } });
+})();
+/* ---------- HIDE HEADER ON SCROLL DOWN, SHOW ON SCROLL UP ---------- */
+(function () {
+  const bar = $(".topbar"), btn = $("#menuBtn"), panel = $("#menuPanel");
+  let last = scrollY, tick = false;
+  function update() {
+    tick = false;
+    const y = Math.max(0, scrollY), d = y - last;
+    if (y < 40 || d < -6) bar.classList.remove("hide");
+    else if (d > 6 && y > 80) {
+      bar.classList.add("hide");
+      if (panel.classList.contains("open")) { panel.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); btn.setAttribute("aria-label", "Open menu"); }
+    }
+    if (Math.abs(d) > 6) last = y;
+  }
+  addEventListener("scroll", () => { if (!tick) { tick = true; requestAnimationFrame(update); } }, { passive: true });
+  bar.addEventListener("focusin", () => bar.classList.remove("hide"));
 })();
 </script>
 </body>
