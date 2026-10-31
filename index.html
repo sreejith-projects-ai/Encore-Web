@@ -1001,4 +1001,16 @@ Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q); })).then(renderUp
       if (el.dataset.gk === key) return;
       el.dataset.gk = key;
       const v = `url(#${filterFor(W, H, rr)}) saturate(160%)`;
-      el.style.backdropFilter = v; el.style.webkitBackdropFi
+      el.style.backdropFilter = v; el.style.webkitBackdropFilter = v;
+    });
+  }
+  let raf = 0;
+  const sched = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; apply(); }); };
+  new MutationObserver(sched).observe(document.body, { childList: true, subtree: true });
+  addEventListener("resize", sched);
+  (document.fonts && document.fonts.ready || Promise.resolve()).then(sched);
+  sched();
+})();
+</script>
+</body>
+</html>
