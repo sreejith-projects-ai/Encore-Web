@@ -228,8 +228,15 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .fin{position:relative;min-height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:end;padding:120px 56px 56px;opacity:0;transition:opacity .4s}
 .film.show .fin{opacity:1;transition-delay:.45s}
 .fl{display:flex;flex-direction:column;gap:18px;align-items:flex-start;max-width:640px}
+.syn-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%}
+.syn-wrap .xh{font:600 clamp(22px,2.6vw,28px)/1.2 var(--display);letter-spacing:-.4px;color:var(--text-main);margin-bottom:8px}
+.clamp-mob{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0}
+.btn-more{background:none;border:0;padding:0;margin:0;color:#6fa8ff;font:500 14px var(--sans);cursor:pointer;vertical-align:baseline}
+.btn-more:hover{text-decoration:underline}
+.btn-more[hidden]{display:none}
 .d-only-f{display:flex;flex-direction:column;gap:18px;align-items:flex-start;width:100%}
-.m-only-f, .m-only-sec, .m-only-times{display:none}
+.m-only-f, .m-only-times{display:none}
+.m-only-sec{display:block}
 @media (min-width: 768px) {
   .desk-hide-fx { display: none !important; }
 }
@@ -241,9 +248,10 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .fin:not(.scr){align-content:start}
 .fh{grid-column:1/-1;min-height:calc(100svh - 176px);display:flex;align-items:flex-end}
 .fm b{color:var(--text-main);font-weight:600}
-.fx{grid-column:1/-1;margin:0 -56px -56px;padding:56px 56px 72px;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:grid;grid-template-columns:minmax(0,1fr);gap:56px}
+.fx{grid-column:1/-1;margin:0 -56px -56px;padding:56px 56px 72px;display:grid;grid-template-columns:minmax(0,1fr);gap:56px}
 .fx,.fx section,.fh{min-width:0}
-.film{overflow-x:hidden}
+.film{overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none}
+.film::-webkit-scrollbar{display:none}
 .fx .xh{font:600 clamp(22px,2.6vw,28px)/1.2 var(--display);letter-spacing:-.4px;color:var(--text-main)}
 .fx section>.xh{margin-bottom:18px}
 .fx .cv-head{margin:0 0 18px}
@@ -408,7 +416,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 
   /* Full-screen film view: poster-led, compact text */
   .fin{grid-template-columns:minmax(0,1fr);padding:84px 20px calc(36px + env(safe-area-inset-bottom));gap:0;align-items:end}
-  .fl{gap:14px;align-items:center;text-align:center}
+  .fl{gap:14px;align-items:center;text-align:center;width:100%;max-width:none}
   .meta{justify-content:center}
   .flogo{max-height:84px;max-width:70%;margin:0 auto}
   .fbg img{object-position:50% 15%}
@@ -466,7 +474,15 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}}
 
 /* All titles: Racing Sans One (single weight), 2% letter spacing, first letter of each word capitalised */
-h1,h2,h3,.d-xl,.d-lg,.d-md,.d-sm,.brand-name,.fx .xh,.cv-head h3,.slogo.st,.bt .tt,.ucard h3,.vcard h3,.scr-head h2{font-family:"Racing Sans One",var(--display);font-weight:400;letter-spacing:.02em;text-transform:capitalize}
+h1,h2,h3,.d-xl,.d-lg,.d-md,.d-sm,.brand-name,.fx .xh,.syn-wrap .xh,.cv-head h3,.slogo.st,.bt .tt,.ucard h3,.vcard h3,.scr-head h2{font-family:"Racing Sans One",var(--display);font-weight:400;letter-spacing:.02em;text-transform:capitalize}
+
+/* Desktop: one equal gap between title/details, Overview, Director, Cast and Gallery */
+@media(min-width:768px){
+  .fin:not(.scr){--sg:56px;row-gap:0}
+  .fl .d-only-f{margin-top:calc(var(--sg) - 18px)}        /* .fl already has an 18px gap */
+  .fx{margin:0;padding:var(--sg) 0 0;gap:var(--sg)}
+  .fx .cast,.fx .cv{padding-bottom:0}
+}
 </style>
 </head>
 <body>
@@ -815,6 +831,27 @@ strip.addEventListener("click", e => { const el = e.target.closest(".slice"); if
 auto(1500);
 
 /* ---------- FULLSCREEN FILM VIEW ---------- */
+const synBlock = text => `<div class="syn-wrap"><h3 class="xh">Overview</h3><p class="syn" data-full="${esc(text)}">${esc(text)}</p></div>`;
+// Two-line overview with "… Show more" sitting inline at the end of line 2 (never past the line end).
+function renderSyn(w) {
+  const p = $(".syn", w), full = p.dataset.full;
+  if (w.dataset.open === "1") { p.innerHTML = esc(full) + ' <button class="btn-more" type="button" data-more-syn>Show less</button>'; return; }
+  if (!p.offsetParent) return;                                          // hidden at this breakpoint
+  const cs = getComputedStyle(p), lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.55, max = lh * 2 + 1;
+  const btn = ' <button class="btn-more" type="button" data-more-syn>Show more</button>';
+  p.innerHTML = esc(full);
+  if (p.scrollHeight <= max) return;                                    // fits in two lines, no button needed
+  let lo = 0, hi = full.length;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    p.innerHTML = esc(full.slice(0, mid).trimEnd()) + "…" + btn;
+    if (p.scrollHeight <= max) lo = mid; else hi = mid - 1;
+  }
+  let cut = full.slice(0, lo); const sp = cut.lastIndexOf(" "); if (sp > 0) cut = cut.slice(0, sp);
+  p.innerHTML = esc(cut.trimEnd()) + "…" + btn;
+}
+const fitSyn = () => $$(".syn-wrap").forEach(renderSyn);
+addEventListener("resize", () => { if (state.open) fitSyn(); });
 function filmHTML(m) {
   const v = view(m), t = m.t || {}, s = SCREENS[m.screen];
   const cast = (t.cast || []).map(c => `<div class="cm"><div class="ph2">${c.photo ? img(c.photo, "w185") : `<span>${esc(c.name.charAt(0))}</span>`}</div><b>${esc(c.name)}</b><span>${esc(c.role || "")}</span></div>`).join("");
@@ -822,18 +859,13 @@ function filmHTML(m) {
   const dirs = (t.directors || []).map(c => `<div class="cm"><div class="ph2">${c.photo ? img(c.photo, "w185") : `<span>${esc(c.name.charAt(0))}</span>`}</div><b>${esc(c.name)}</b></div>`).join("");
   
   const detailsHtmlDesk = `
-      ${t.director ? `<p class="fm">Directed by <b>${esc(t.director)}</b></p>` : ""}
-      <div class="syn-wrap"><p class="syn">${esc(v.syn)}</p></div>
+      ${synBlock(v.syn)}
       <div class="times" data-id="${m.id}">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
       <p class="mnext" data-mnext="${m.id}"></p>
   `;
 
   const detailsHtmlMob = `
-      <div class="syn-wrap">
-        <h3 class="xh" style="margin-bottom:12px">Overview</h3>
-        <p class="syn clamp-mob">${esc(v.syn)}</p>
-        <span class="btn-more m-only" data-more-syn>Show more</span>
-      </div>
+      ${synBlock(v.syn)}
   `;
 
   return `<div class="fh"><div class="fl">
@@ -923,6 +955,7 @@ function openOverlay(key, from, bg, html, cls) {
   document.documentElement.style.overflow = "hidden";
   film.classList.add("show"); film.style.clipPath = "inset(0px)";
   tick();
+  requestAnimationFrame(fitSyn);
   setTimeout(() => $("#fclose").focus({ preventScroll: true }), 500);
 }
 function openFilm(id, from) {
@@ -951,8 +984,9 @@ $$(".screens [data-screen]").forEach(el => {
 $("#fin").addEventListener("click", e => {
   const bSyn = e.target.closest("[data-more-syn]");
   if (bSyn) {
-    bSyn.previousElementSibling.classList.remove("clamp-mob");
-    bSyn.remove();
+    const w = bSyn.closest(".syn-wrap");
+    w.dataset.open = w.dataset.open === "1" ? "" : "1";
+    renderSyn(w);
     return;
   }
   const b = e.target.closest("[data-cv]"); if (!b) return;
@@ -967,7 +1001,7 @@ film.addEventListener("scroll", () => {
     filmScrollTick = true;
     requestAnimationFrame(() => {
       filmScrollTick = false;
-      if (!state.open || !MOB.matches) return;
+      if (!state.open) return;
       const y = film.scrollTop;
       const img = $("#fbg img");
       if (img) {
