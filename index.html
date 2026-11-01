@@ -116,7 +116,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   -webkit-mask-composite:xor;mask-composite:exclude}
 .topbar{position:fixed;top:14px;left:0;right:0;z-index:50;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;pointer-events:none}
 .topbar .brand{pointer-events:auto;position:relative;z-index:2}
-.topbar{transition:transform .45s var(--ease)}
+.topbar{transition:transform .45s var(--ease), opacity .45s var(--ease)}
 .topbar.hide{transform:translateY(-120px)}
 .topbar.hide .brand,.topbar.hide .menu{pointer-events:none}
 .glass>*{position:relative;z-index:1}
@@ -222,14 +222,35 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .sh{font-size:12px;color:var(--text-muted)}
 
 /* Fullscreen film view */
-.film{position:fixed;inset:0;z-index:80;background:#000;color:var(--on-dark);overflow:auto;visibility:hidden;clip-path:inset(0);transition:clip-path .75s var(--ease),visibility 0s .75s}
-.film.show{visibility:visible;transition:clip-path .75s var(--ease),visibility 0s}
-.fbg{position:fixed;inset:0;background:radial-gradient(ellipse at 75% 20%,rgba(0,113,227,.3),transparent 55%),#050507}
-.fbg img{width:100%;height:100%;object-fit:cover;will-change:transform,opacity,filter}
-.fbg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg, rgba(0,0,0,0.65) 20%, transparent 70%), linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 50%)}
-.btn.fclose{position:fixed;top:22px;left:56px;z-index:5;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;height:44px}
-.fin{position:relative;min-height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:end;padding:120px 56px 56px;opacity:0;transition:opacity .4s}
-.film.show .fin{opacity:1;transition-delay:.45s}
+.topbar, main > section:not(#banner), .foot { transition: transform 0.7s var(--ease), opacity 0.6s var(--ease); }
+body.page-out .topbar, 
+body.page-out main > section:not(#banner), 
+body.page-out .foot,
+body.page-out #banner > *:not(.bg):not(.bshade) {
+  transform: translateY(-80px) !important; 
+  opacity: 0 !important; 
+  pointer-events: none;
+  transition: transform 0.7s var(--ease), opacity 0.6s var(--ease) !important;
+}
+body.page-returning #banner > *:not(.bg):not(.bshade) {
+  transition: transform 0.7s var(--ease), opacity 0.6s var(--ease) !important;
+}
+
+.film{position:fixed;inset:0;z-index:80;background:transparent;color:var(--on-dark);overflow:auto;visibility:hidden;transition:visibility 0s 1s}
+.film.show{visibility:visible;transition:visibility 0s 0s}
+
+.fbg{position:fixed;inset:0;background:#050507;opacity:0;transition:opacity 0.6s var(--ease)}
+.film.show .fbg{opacity:1}
+.fbg-ambient{position:absolute;inset:-20%;width:140%;height:140%;object-fit:cover;filter:blur(80px) saturate(200%);opacity:0.6;z-index:0;transform:translate3d(0,0,0)}
+.fbg-sharp{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;will-change:transform,opacity,filter}
+.fbg::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,rgba(0,0,0,.92) 30%,rgba(0,0,0,.4) 75%,rgba(0,0,0,.25)),linear-gradient(0deg,rgba(0,0,0,.8),transparent 50%);pointer-events:none}
+
+.btn.fclose{position:fixed;top:22px;left:56px;z-index:5;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;height:44px;opacity:0;transform:translateY(-20px);transition:opacity 0.5s var(--ease),transform 0.5s var(--ease)}
+.film.show .btn.fclose{opacity:1;transform:translateY(0);transition-delay:0.5s}
+
+.fin{position:relative;min-height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:end;padding:120px 56px 56px;opacity:0;transform:translateY(120px);transition:opacity 0.7s var(--ease),transform 0.8s var(--ease)}
+.film.show .fin{opacity:1;transform:translateY(0);transition-delay:0.3s}
+
 .fl{display:flex;flex-direction:column;gap:18px;align-items:flex-start;max-width:640px}
 .syn-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%}
 .syn-wrap .xh{font:600 clamp(22px,2.6vw,28px)/1.2 var(--display);letter-spacing:-.4px;color:var(--text-main);margin-bottom:8px}
@@ -358,10 +379,10 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .cv-head{display:flex;justify-content:space-between;align-items:center;margin:72px 0 20px}
 .cv-head h3{font:600 clamp(24px,3vw,32px)/1.2 var(--display);letter-spacing:-.5px;color:var(--text-main)}
 .cv-btns{display:flex;gap:8px}
-.cv-btns .btn{width:44px;padding:0}
+.cv-btns .btn{width:44px;height:44px;min-height:44px;padding:0}
 .cv{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:4px}
 .cv::-webkit-scrollbar{display:none}
-.cv figure{position:relative;flex:0 0 min(560px,82%);aspect-ratio:16/10;scroll-snap-align:start;margin:0;overflow:hidden;background:linear-gradient(135deg,rgba(0,113,227,.25),rgba(255,255,255,.04));border:1px solid var(--glass-border)}
+.cv figure{position:relative;flex:0 0 min(560px,82%);aspect-ratio:16/10;scroll-snap-align:start;margin:0;overflow:hidden;background:linear-gradient(135deg,rgba(0,113,227,.25),rgba(255,255,255,.04));border:1px solid var(--glass-border);border-radius:16px}
 .cv img{width:100%;height:100%;object-fit:cover}
 .cv figcaption{position:absolute;left:0;right:0;bottom:0;padding:36px 18px 14px;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent);font-size:14px;color:var(--text-main)}
 .cv .soon{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;color:var(--text-muted);padding-bottom:30px}
@@ -426,7 +447,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   .fl{gap:14px;align-items:center;text-align:center;width:100%;max-width:none}
   .meta{justify-content:center}
   .flogo{max-height:84px;max-width:70%;margin:0 auto}
-  .fbg img{object-position:50% 15%}
+  .fbg .fbg-sharp, .fbg .fbg-ambient{object-position:50% 15%}
   .fbg::after{background:linear-gradient(0deg,rgba(0,0,0,.75) 20%,rgba(0,0,0,.4) 48%,transparent 78%,rgba(0,0,0,.15))}
   .d-only-f{display:none}
   .m-only-times{display:flex;flex-direction:column;align-items:center;width:100%;margin-top:8px;gap:8px}
@@ -887,7 +908,7 @@ function filmHTML(m) {
       <div class="m-only-f">${detailsHtmlMob}</div>
       ${dirs ? `<section class="m-only-sec"><h3 class="xh">${t.directors && t.directors.length > 1 ? 'Directors' : 'Director'}</h3><div class="cast">${dirs}</div></section>` : ""}
       ${cast ? `<section><h3 class="xh">Cast</h3><div class="cast">${cast}</div></section>` : ""}
-      ${gal ? `<section><div class="cv-head"><h3 class="xh">Gallery</h3><div class="cv-btns"><button class="btn" data-cv="-1" aria-label="Previous image">&larr;</button><button class="btn" data-cv="1" aria-label="Next image">&rarr;</button></div></div><div class="cv" id="cv">${gal}</div></section>` : ""}
+      ${gal ? `<section><div class="cv-head"><h3 class="xh">Gallery</h3><div class="cv-btns"><button class="glass btn" data-cv="-1" aria-label="Previous image"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg></button><button class="glass btn" data-cv="1" aria-label="Next image"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg></button></div></div><div class="cv" id="cv">${gal}</div></section>` : ""}
     </div>`;
 }
 /* Theatre technical data (demo values, edit freely). Add real photos by setting src to an image path or URL. */
@@ -941,45 +962,54 @@ function screenHTML(n) {
         <div><dt>Playing now</dt><dd>${here || "No films scheduled"}</dd></div>
       </dl>
     </div>
-    <div class="cv-head"><h3>Inside the room</h3><div class="cv-btns"><button class="btn" data-cv="-1" aria-label="Previous photo">&larr;</button><button class="btn" data-cv="1" aria-label="Next photo">&rarr;</button></div></div>
+    <div class="cv-head"><h3>Inside the room</h3><div class="cv-btns"><button class="glass btn" data-cv="-1" aria-label="Previous photo"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg></button><button class="glass btn" data-cv="1" aria-label="Next photo"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg></button></div></div>
     <div class="cv" id="cv">${photos}</div>`;
 }
 
 const film = $("#film");
 let filmFrom = null;
-const rectClip = el => { const r = el.getBoundingClientRect(); return `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px)`; };
+
 function openOverlay(key, from, bg, html, cls) {
   state.open = key; filmFrom = from;
   $("#fbg").innerHTML = bg;
   const fin = $("#fin"); fin.className = "fin " + (cls || ""); fin.innerHTML = html;
   film.classList.toggle("scrmode", cls === "scr");
   film.scrollTop = 0;
-  film.style.transition = "none"; film.style.clipPath = rectClip(from);
-  void film.offsetWidth;
-  film.style.transition = "";
   document.documentElement.style.overflow = "hidden";
-  film.classList.add("show"); film.style.clipPath = "inset(0px)";
+  document.body.classList.add("page-out");
+  film.classList.add("show");
   tick();
   requestAnimationFrame(fitSyn);
   setTimeout(() => $("#fclose").focus({ preventScroll: true }), 500);
 }
 function openFilm(id, from) {
   const m = NOW.find(x => x.id === id), t = m.t || {};
-  openOverlay(id, from, MOB.matches && t.poster ? img(t.poster, "w780") : t.backdrop ? img(t.backdrop, "w1280") : "", filmHTML(m), "");
+  const src = MOB.matches && t.poster ? `${IMG}w780${t.poster}` : t.backdrop ? `${IMG}w1280${t.backdrop}` : "";
+  const bgHtml = src ? `<img class="fbg-ambient" src="${src}" alt=""><img class="fbg-sharp" src="${src}" alt="">` : "";
+  openOverlay(id, from, bgHtml, filmHTML(m), "");
 }
 function openScreen(n, from) {
   const sc = SCREENS[n];
-  const bgHtml = `<img src="${sc.bg}" style="width:100%;height:100%;object-fit:cover;opacity:0.4;position:absolute;inset:0">`;
+  const bgHtml = `<img class="fbg-ambient" src="${sc.bg}" alt=""><img class="fbg-sharp" src="${sc.bg}" style="opacity:0.4" alt="">`;
   openOverlay("screen" + n, from, bgHtml, screenHTML(n), "scr");
 }
 function closeFilm() {
   if (!state.open) return;
   state.open = null;
-  film.style.clipPath = filmFrom && document.contains(filmFrom) ? rectClip(filmFrom) : "inset(50% 50% 50% 50%)";
+  
+  // Reverse the main page animation
+  document.body.classList.remove("page-out");
+  document.body.classList.add("page-returning");
+  setTimeout(() => document.body.classList.remove("page-returning"), 800);
+  
+  // Close the overlay
   film.classList.remove("show");
   document.documentElement.style.overflow = "";
-  const f = filmFrom; filmFrom = null;
-  if (f && document.contains(f)) f.focus({ preventScroll: true });
+  
+  // Return to the top of the landing page
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  
+  filmFrom = null;
 }
 $$(".screens [data-screen]").forEach(el => {
   el.addEventListener("click", () => openScreen(+el.dataset.screen, el));
@@ -1007,7 +1037,7 @@ film.addEventListener("scroll", () => {
       filmScrollTick = false;
       if (!state.open) return;
       const y = film.scrollTop;
-      const img = $("#fbg img");
+      const img = $("#fbg .fbg-sharp");
       if (img) {
         const scale = 1 + (y / 1500);
         const op = Math.max(0.15, 1 - y / 500);
