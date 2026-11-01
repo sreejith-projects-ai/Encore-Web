@@ -160,8 +160,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .bg{position:absolute;inset:0;background:transparent}
 .bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:fade 1s var(--ease);mask-image:linear-gradient(to bottom, black 50%, transparent 100%);-webkit-mask-image:linear-gradient(to bottom, black 50%, transparent 100%)}
 .bshade{position:absolute;inset:0;background:linear-gradient(90deg, rgba(0,0,0,0.65) 20%, transparent 70%), linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 50%)}
-.bcont{position:absolute;inset:0;padding:64px 48px;display:flex;flex-direction:column;justify-content:flex-end;gap:20px;max-width:760px;transition:opacity .25s,transform .4s var(--ease)}
-.bcont.out{opacity:0;transform:translateY(12px)}
+.bcont{position:absolute;inset:0;padding:64px 48px;display:flex;flex-direction:column;justify-content:flex-end;gap:20px;max-width:760px;transition:opacity .4s var(--ease),transform .5s var(--ease);transform:translateX(var(--btx,0));opacity:var(--bop,1)}
 .bcont h1{color:var(--on-dark);margin-bottom:16px}
 .bcont h1.has-logo{line-height:0}
 .blogo{display:block;max-width:min(520px,100%);max-height:150px;width:auto;height:auto;object-fit:contain;object-position:left bottom;filter:drop-shadow(0 2px 16px rgba(0,0,0,.45));animation:fade .8s var(--ease)}
@@ -189,8 +188,12 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .bt .lg{position:absolute;z-index:2;left:8px;bottom:8px;max-width:72%;max-height:42%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.6))}
 .bt .tt{position:absolute;z-index:2;left:8px;right:8px;bottom:8px;font:600 11px/1.2 var(--display);text-align:left;text-shadow:0 1px 4px rgba(0,0,0,.7)}
 .bt[aria-selected=true]{opacity:1;border-color:var(--primary);transform:translateY(-6px) scale(1.07);box-shadow:0 0 0 3px rgba(0,113,227,.25),0 12px 28px rgba(0,0,0,.5)}
-.bposter{position:absolute;right:48px;top:50%;transform:translateY(-58%);width:min(280px,22vw);aspect-ratio:2/3;border-radius:24px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.5);border:1px solid var(--glass-border);animation:fade .8s var(--ease);transition:opacity .25s,transform .4s var(--ease)}
-.bposter.out{opacity:0;transform:translateY(calc(-58% + 12px)) !important}
+.bposter{position:absolute;right:48px;top:50%;transform:translate(var(--btx,0),-58%);width:min(280px,22vw);aspect-ratio:2/3;border-radius:24px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.5);border:1px solid var(--glass-border);animation:fade .8s var(--ease);transition:opacity .4s var(--ease),transform .5s var(--ease);opacity:var(--bop,1)}
+.slide-out-left { --btx: -60px; --bop: 0; }
+.slide-out-right { --btx: 60px; --bop: 0; }
+.slide-in-left { --btx: -60px; --bop: 0; }
+.slide-in-right { --btx: 60px; --bop: 0; }
+.no-trans { transition: none !important; }
 .bposter img{width:100%;height:100%;object-fit:cover}
 @keyframes fade{from{opacity:0}}
 
@@ -792,16 +795,20 @@ function tick() {
 
 /* ---------- BANNER ---------- */
 let bannerAutoT;
+let renderBannerT;
+let slideDir = 1;
+
 function startBannerAuto() {
   clearTimeout(bannerAutoT);
   if (RM) return;
   bannerAutoT = setTimeout(() => {
-    if (!state.open) goBanner(state.bi + 1);
+    if (!state.open) goBanner(state.bi + 1, 1);
     else startBannerAuto();
   }, 5000);
 }
 
 function renderBanner(first) {
+  clearTimeout(renderBannerT);
   const m = ORDER[state.bi], v = view(m), t = m.t || {}, s = SCREENS[m.screen];
   const set = () => {
     $("#bbg").innerHTML = MOB.matches && t.poster ? img(t.poster, "w780") : t.backdrop ? img(t.backdrop, "w1280") : "";
@@ -822,21 +829,45 @@ function renderBanner(first) {
         <div class="times" data-id="${m.id}" style="width: 100%;">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
       </div>
       <button class="btn btn-dk bmore" data-more>Full details</button>`;
-    $("#bcont").classList.remove("out");
-    $("#bposter").classList.remove("out");
+      
+    if (!first) {
+      const els = [$("#bcont"), $("#bposter")];
+      els.forEach(el => {
+        el.classList.add("no-trans");
+        el.classList.remove("slide-out-left", "slide-out-right");
+        el.classList.add(slideDir === 1 ? "slide-in-right" : "slide-in-left");
+      });
+      void $("#bcont").offsetWidth; // Force reflow
+      els.forEach(el => {
+        el.classList.remove("no-trans", "slide-in-right", "slide-in-left");
+      });
+    }
+
     $("#bthumbs").classList.remove("out");
     renderThumbs();
     tick();
     startBannerAuto();
   };
-  if (first) set(); else { 
-    $("#bcont").classList.add("out"); 
-    $("#bposter").classList.add("out");
+  
+  if (first) {
+    set(); 
+  } else { 
+    const els = [$("#bcont"), $("#bposter")];
+    els.forEach(el => el.classList.add(slideDir === 1 ? "slide-out-left" : "slide-out-right"));
     $("#bthumbs").classList.add("out");
-    setTimeout(set, 250); 
+    renderBannerT = setTimeout(set, 400); 
   }
 }
-function goBanner(i) { state.bi = (i + ORDER.length) % ORDER.length; renderBanner(false); }
+
+function goBanner(i, dir) { 
+  slideDir = dir || (i > state.bi ? 1 : -1); 
+  if (!dir) {
+    if (state.bi === 0 && i === ORDER.length - 1) slideDir = -1;
+    if (state.bi === ORDER.length - 1 && i === 0) slideDir = 1;
+  }
+  state.bi = (i + ORDER.length) % ORDER.length; 
+  renderBanner(false); 
+}
 function renderThumbs() {
   const box = $("#bthumbs"), keep = box.scrollLeft;
   box.innerHTML = ORDER.map((m, i) => {
@@ -850,7 +881,23 @@ function renderThumbs() {
 }
 $("#bcont").addEventListener("click", e => { const b = e.target.closest("[data-more]"); if (b) openFilm(ORDER[state.bi].id, b); });
 MOB.addEventListener("change", () => renderBanner(true));
-$("#bthumbs").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (b && +b.dataset.i !== state.bi) { clearTimeout(bannerAutoT); goBanner(+b.dataset.i); } });
+$("#bthumbs").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (b && +b.dataset.i !== state.bi) { clearTimeout(bannerAutoT); let nextI = +b.dataset.i; let dir = nextI > state.bi ? 1 : -1; if (state.bi === 0 && nextI === ORDER.length - 1) dir = -1; if (state.bi === ORDER.length - 1 && nextI === 0) dir = 1; goBanner(nextI, dir); } });
+
+let btsX = 0, btsY = 0;
+$("#banner").addEventListener('touchstart', e => {
+  btsX = e.changedTouches[0].screenX;
+  btsY = e.changedTouches[0].screenY;
+}, {passive: true});
+$("#banner").addEventListener('touchend', e => {
+  if (e.target.closest('#bthumbs')) return; // Allow natural scrolling on the thumbnails
+  let dx = e.changedTouches[0].screenX - btsX;
+  let dy = e.changedTouches[0].screenY - btsY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+    clearTimeout(bannerAutoT);
+    let dir = dx < 0 ? 1 : -1;
+    goBanner(state.bi + dir, dir);
+  }
+}, {passive: true});
 
 /* ---------- FULLSCREEN FILM VIEW ---------- */
 const synBlock = text => `<div class="syn-wrap"><h3 class="xh">Overview</h3><p class="syn" data-full="${esc(text)}">${esc(text)}</p></div>`;
@@ -970,6 +1017,7 @@ const film = $("#film");
 let filmFrom = null;
 
 function openOverlay(key, from, bg, html, cls) {
+  if (!state.open) history.pushState({ modal: true }, "");
   state.open = key; filmFrom = from;
   $("#fbg").innerHTML = bg;
   const fin = $("#fin"); fin.className = "fin " + (cls || ""); fin.innerHTML = html;
@@ -993,9 +1041,11 @@ function openScreen(n, from) {
   const bgHtml = `<img class="fbg-ambient" src="${sc.bg}" alt=""><img class="fbg-sharp" src="${sc.bg}" style="opacity:0.4" alt="">`;
   openOverlay("screen" + n, from, bgHtml, screenHTML(n), "scr");
 }
-function closeFilm() {
+function closeFilm(fromHistory = false) {
   if (!state.open) return;
   state.open = null;
+  
+  if (fromHistory !== true) history.back();
   
   // Reverse the main page animation
   document.body.classList.remove("page-out");
@@ -1026,8 +1076,9 @@ $("#fin").addEventListener("click", e => {
   const b = e.target.closest("[data-cv]"); if (!b) return;
   const cv = $("#cv"); cv.scrollBy({ left: +b.dataset.cv * cv.clientWidth * .8, behavior: "smooth" });
 });
-$("#fclose").addEventListener("click", closeFilm);
-document.addEventListener("keydown", e => { if (e.key === "Escape") closeFilm(); });
+$("#fclose").addEventListener("click", () => closeFilm(false));
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeFilm(false); });
+window.addEventListener("popstate", () => { if (state.open) closeFilm(true); });
 
 let filmScrollTick = false;
 film.addEventListener("scroll", () => {
