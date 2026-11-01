@@ -606,6 +606,8 @@ h1,h2,h3,.d-xl,.d-lg,.d-md,.d-sm,.brand-name,.fx .xh,.syn-wrap .xh,.cv-head h3,.
 <script>
 // TMDB key comes from config.js (const TMDB_KEY). Falls back to "" if that file is not loaded.
 const API_KEY = typeof TMDB_KEY !== "undefined" ? TMDB_KEY : "";
+// Country used for "now playing" and certificates. "IN" = India, "US" = United States, "GB" = United Kingdom ...
+const REGION = "IN";
 /* ---------- CONFIG ---------- */
 // Free key: themoviedb.org → Settings → API. Leave empty to run on local data with placeholder posters.
 const IMG = "https://image.tmdb.org/t/p/";
@@ -617,35 +619,31 @@ const SCREENS = {
 };
 // times: daily, 24h "HH:MM". q: title used to find TMDB data. Local values are fallbacks if TMDB has none.
 const NOW = [
-  { id: "doomsday", q: "Avengers: Doomsday", year: 2026, screen: 2, ratio: "1.90:1 Expanded", genre: "Action · Sci-Fi", runtime: 150, cert: "UA 13+", release: "2026-12-18", langs: ["English", "Hindi", "Tamil", "Telugu"],
-    note: "Shot for the taller frame, so scenes fill the screen top to bottom. Custom bass tuning for the EPIQ room.",
-    synopsis: "The Avengers face their largest threat yet in an event built for the biggest screen in the building.", times: ["14:30", "21:15"] },
-  { id: "odyssey", q: "The Odyssey", year: 2026, screen: 2, ratio: "1.90:1 Expanded", genre: "Adventure · Epic", runtime: 170, cert: "UA 16+", release: "2026-07-17", langs: ["English", "Hindi"],
-    note: "Large-format laser presentation with the expanded frame in key sequences.",
-    synopsis: "Odysseus's ten-year journey home, told at epic scale.", times: ["11:00", "18:00"] },
-  { id: "hailmary", q: "Project Hail Mary", year: 2026, screen: 1, ratio: "2.39:1 Scope", genre: "Sci-Fi · Drama", runtime: 156, cert: "UA 13+", release: "2026-03-20", langs: ["English"],
-    note: "Wide Scope frame with black bars top and bottom on Screen 1.",
-    synopsis: "A lone astronaut wakes with no memory and a mission to save Earth.", times: ["10:00", "15:00", "20:45"] },
-  { id: "spidey", q: "Spider-Man: Brand New Day", year: 2026, screen: 1, ratio: "1.85:1 Flat", genre: "Action · Adventure", runtime: 135, cert: "UA 13+", release: "2026-07-31", langs: ["English", "Hindi", "Malayalam"],
-    note: "Flat 1.85:1 frame, with slightly more height than Scope.",
-    synopsis: "Peter Parker tries to build a quieter life in a city that remembers him.", times: ["12:30", "18:00"] }
+  { id: "clayface", q: "Clayface", year: 2026, screen: 2, ratio: "1.90:1 Expanded", genre: "Horror · Sci-Fi · Thriller", runtime: 108, cert: "A", release: "2026-10-23", langs: ["English", "Hindi"],
+    note: "Dolby Atmos mix, played through the EPIQ room's overhead speaker array.",
+    synopsis: "Matt Hagen's rise from Gotham street kid to Hollywood leading man is cut short when a crime boss's actions leave him horribly disfigured.", times: ["11:00", "16:30", "21:30"] },
+  { id: "streetfighter", q: "Street Fighter", year: 2026, screen: 2, ratio: "1.90:1 Expanded", genre: "Action · Martial Arts", runtime: 120, cert: "UA 13+", release: "2026-10-16", langs: ["English", "Hindi", "Tamil"],
+    note: "Filmed for IMAX, so the big fight scenes open up to the full tall frame.",
+    synopsis: "Estranged fighters are pulled into the World Warrior Tournament in 1993, where one fight decides everything.", times: ["13:30", "19:00"] },
+  { id: "wildwood", q: "Wildwood", year: 2026, screen: 1, ratio: "2.39:1 Scope", genre: "Animation · Fantasy", runtime: 132, cert: "UA 13+", release: "2026-10-23", langs: ["English", "Hindi"],
+    note: "Laika's hand-built stop-motion sets look sharpest on Screen 1's 4K laser picture.",
+    synopsis: "Prue McKeel ventures into the forests outside Portland to find her kidnapped baby brother.", times: ["10:00", "14:30", "19:00"] },
+  { id: "wicker", q: "Wicker", year: 2026, screen: 1, ratio: "1.85:1 Flat", genre: "Romance · Comedy", runtime: 105, cert: "UA 16+", release: "2026-10-23", langs: ["English"],
+    note: "Flat 1.85:1 frame with 7.1 surround, a good fit for a dialogue-led romance.",
+    synopsis: "An offbeat period romance starring Olivia Colman and Alexander Skarsg\u00e5rd.", times: ["12:45", "17:15", "21:30"] }
 ];
+// Nearest upcoming releases first (checked 1 Nov 2026). TMDB supplies the final release date when it has one.
 let UPCOMING = [
-  { q: "Dune: Part Three", date: "2027-12-18", blurb: "The saga of Paul Atreides reaches its final chapter." },
-  { q: "Narnia: The Magician's Nephew", date: "2027-11-26", blurb: "Greta Gerwig's take on the origins of Narnia." },
-  { q: "Shrek 5", date: "2027-06-30", blurb: "The ogre returns to the swamp." },
-  { q: "The Batman Part II", date: "2027-10-01", blurb: "Gotham's detective returns." },
-  { q: "Avengers: Secret Wars", date: "2027-05-07", blurb: "The culmination of the Multiverse Saga." },
-  { q: "Star Wars: New Jedi Order", date: "2027-12-17", blurb: "Rey Skywalker rebuilds the Jedi order." },
-  { q: "Supergirl: Woman of Tomorrow", date: "2027-06-26", blurb: "Kara Zor-El's cosmic journey." },
-  { q: "Spider-Man: Beyond the Spider-Verse", date: "2027-03-20", blurb: "Miles Morales' journey concludes." },
-  { q: "Avatar: Fire and Ash", date: "2027-12-17", blurb: "Return to Pandora." },
-  { q: "Mickey 17", date: "2027-04-18", blurb: "Bong Joon Ho's next sci-fi." },
-  { q: "Frozen III", date: "2027-11-24", blurb: "Return to Arendelle." },
-  { q: "Minions 3", date: "2027-06-30", blurb: "More mischief." },
-  { q: "Fast X: Part 2", date: "2027-04-04", blurb: "The finale." },
-  { q: "Blade", date: "2027-11-05", blurb: "The Daywalker returns." },
-  { q: "The Super Mario Bros. Movie 2", date: "2026-12-20", blurb: "Wahoo!" }
+  { q: "Ramayana: Part 1", date: "2026-11-05", blurb: "Ranbir Kapoor, Yash and Sai Pallavi star in the first part of an epic retelling of the Ramayana." },
+  { q: "The Cat in the Hat", date: "2026-11-06", blurb: "Warner Bros.' animated take on the Dr. Seuss classic, with Bill Hader voicing the Cat." },
+  { q: "Godzilla Minus Zero", date: "2026-11-06", blurb: "The follow-up to Godzilla Minus One returns to postwar Japan." },
+  { q: "Ebenezer", date: "2026-11-13", blurb: "Johnny Depp plays Scrooge in Ti West's take on A Christmas Carol." },
+  { q: "How to Rob a Bank", date: "2026-11-13", blurb: "A new heist film arriving mid-November." },
+  { q: "The Hunger Games: Sunrise on the Reaping", date: "2026-11-20", blurb: "The prequel follows a young Haymitch Abernathy through the 50th Hunger Games." },
+  { q: "Hexed", date: "2026-11-25", blurb: "Disney's new animated adventure opens for Thanksgiving week." },
+  { q: "Focker-in-Law", date: "2026-11-25", blurb: "The next chapter of the Meet the Parents family comedy." },
+  { q: "Dune: Part Three", date: "2026-12-18", blurb: "Denis Villeneuve closes his trilogy, adapting Dune Messiah." },
+  { q: "Avengers: Doomsday", date: "2026-12-18", blurb: "Robert Downey Jr. returns as Doctor Doom in Marvel's Avengers event." }
 ];
 const VAULT_SEED = [["Blade Runner", 1982, 42], ["Spirited Away", 2001, 37], ["2001: A Space Odyssey", 1968, 31], ["Alien", 1979, 24], ["Back to the Future", 1985, 19], ["Akira", 1988, 15]];
 
@@ -696,6 +694,31 @@ function bestLogo(list) {
 }
 // TMDB marks images without any title text with iso_639_1 = null. Prefer those, best rated first.
 const textless = list => (list || []).filter(i => !i.iso_639_1).sort((x, y) => (y.vote_average || 0) - (x.vote_average || 0));
+// Certification: the region's own rating if TMDB has one, otherwise the US rating translated to the Indian scale.
+function certFor(d) {
+  const rd = (d.release_dates && d.release_dates.results) || [];
+  const pick = c => { const r = rd.find(x => x.iso_3166_1 === c); const x = r && (r.release_dates || []).find(y => y.certification); return x ? x.certification : ""; };
+  const local = pick(REGION); if (local) return local;
+  const us = { G: "U", PG: "UA 7+", "PG-13": "UA 13+", R: "A", "NC-17": "A" }[pick("US")];
+  return us || "NR";
+}
+function mapDetails(d) {
+  const im = d.images || {}, posters = textless(im.posters), backs = textless(im.backdrops);
+  return {
+    id: d.id, title: d.title, cert: certFor(d),
+    poster: posters[0] ? posters[0].file_path : d.poster_path,
+    backdrop: backs[0] ? backs[0].file_path : d.backdrop_path,
+    overview: d.overview, runtime: d.runtime,
+    genres: (d.genres || []).map(g => g.name), score: d.vote_average, release: d.release_date,
+    langs: (d.spoken_languages || []).map(l => l.english_name),
+    gallery: [...new Set((backs.length ? backs : im.backdrops || []).map(b => b.file_path))].filter(f => f !== (backs[0] ? backs[0].file_path : d.backdrop_path)).slice(0, 10),
+    director: ((d.credits && d.credits.crew) || []).filter(c => c.job === "Director").map(c => c.name).join(", "),
+    directors: ((d.credits && d.credits.crew) || []).filter(c => c.job === "Director").map(c => ({ name: c.name, photo: c.profile_path })),
+    cast: ((d.credits && d.credits.cast) || []).slice(0, 12).map(c => ({ name: c.name, role: c.character, photo: c.profile_path })),
+    logo: bestLogo(im.logos)
+  };
+}
+const detailsById = async id => mapDetails(await tmdb("/movie/" + id, { append_to_response: "images,credits,release_dates", include_image_language: "en,null" }));
 async function lookup(title, year, light) {
   if (!API_KEY) return null;
   try {
@@ -706,20 +729,7 @@ async function lookup(title, year, light) {
       try { const im = await tmdb(`/movie/${hit.id}/images`, { include_image_language: "null" }); const p = textless(im.posters)[0]; if (p) poster = p.file_path; } catch (e) {}
       return { poster };
     }
-    const d = await tmdb("/movie/" + hit.id, { append_to_response: "images,credits", include_image_language: "en,null" });
-    const im = d.images || {}, posters = textless(im.posters), backs = textless(im.backdrops);
-    return {
-      poster: posters[0] ? posters[0].file_path : d.poster_path,
-      backdrop: backs[0] ? backs[0].file_path : d.backdrop_path,
-      overview: d.overview, runtime: d.runtime,
-      genres: (d.genres || []).map(g => g.name), score: d.vote_average, release: d.release_date,
-      langs: (d.spoken_languages || []).map(l => l.english_name),
-      gallery: [...new Set((backs.length ? backs : im.backdrops || []).map(b => b.file_path))].filter(f => f !== (backs[0] ? backs[0].file_path : d.backdrop_path)).slice(0, 10),
-      director: ((d.credits && d.credits.crew) || []).filter(c => c.job === "Director").map(c => c.name).join(", "),
-      directors: ((d.credits && d.credits.crew) || []).filter(c => c.job === "Director").map(c => ({ name: c.name, photo: c.profile_path })),
-      cast: ((d.credits && d.credits.cast) || []).slice(0, 12).map(c => ({ name: c.name, role: c.character, photo: c.profile_path })),
-      logo: bestLogo(im.logos)
-    };
+    return await detailsById(hit.id);
   } catch (e) { return null; }
 }
 
@@ -736,7 +746,7 @@ function nextOf(list, ns) {
 }
 // Banner order: soonest next show first, fixed when the page loads
 const ORDER = [...NOW].sort((a, b) => nextOf([a], nowSec()).delta - nextOf([b], nowSec()).delta);
-const firstId = ORDER[0].id;
+let firstId = ORDER[0].id;
 
 function tick() {
   const ns = nowSec();
@@ -1191,17 +1201,93 @@ $("#vform").addEventListener("submit", e => {
   renderVault();
 });
 
-/* ---------- INIT ---------- */
-renderBanner(true); renderUpcoming(); renderVault();
-setInterval(tick, 1000);
-Promise.all(NOW.map(async m => { m.t = await lookup(m.q, m.year); })).then(() => { renderBanner(true); });
-Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q); })).then(() => {
-  UPCOMING = UPCOMING.filter(m => {
-    const rel = (m.t && m.t.release) || m.date;
-    return Math.ceil((new Date(rel + "T12:00:00") - new Date()) / 864e5) > 0;
+/* ---------- LIVE MOVIE DATA ----------
+   Now showing and Upcoming are read from TMDB every time the page opens, so they follow the calendar by themselves.
+   TMDB knows the films; it does not know this theatre's screens and showtimes, so those are built here.
+   To pin real values for a film, add its TMDB id below, e.g. 1234567: { screen: 2, ratio: "1.90:1 Expanded", times: ["14:30", "21:15"], note: "..." } */
+const THEATRE_OVERRIDES = {};
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const addDays = n => { const d = new Date(); d.setDate(d.getDate() + n); return ymd(d); };
+const toHM = m => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+
+function buildTheatre(films) {
+  // The two most popular films get the EPIQ screen, the rest play on Screen 1
+  films.forEach((m, i) => {
+    const ov = THEATRE_OVERRIDES[m.tmdbId] || {}, anim = /animation/i.test(m.genre);
+    m.screen = ov.screen || (i < 2 ? 2 : 1);
+    m.ratio = ov.ratio || (m.screen === 2 ? "1.90:1 Expanded" : anim || i % 2 ? "1.85:1 Flat" : "2.39:1 Scope");
+    m.note = ov.note || (m.screen === 2
+      ? "Presented in the EPIQ room's taller 1.90:1 frame, with laser projection and immersive audio."
+      : `Presented in its native ${m.ratio.split(" ")[0]} frame, with 4K laser projection and 7.1 surround.`);
+    if (ov.times) m.times = ov.times;
   });
-  renderUpcoming();
-});
+  // Showtimes: films on the same screen take turns from 10:00, with a 25 minute gap, three shows each
+  [1, 2].forEach(sc => {
+    const list = films.filter(m => m.screen === sc && !m.times);
+    list.forEach(m => m.times = []);
+    let t = 10 * 60, i = 0;
+    while (list.length && list.some(m => m.times.length < 3)) {
+      const m = list[i++ % list.length], r = (m.t && m.t.runtime) || m.runtime || 120;
+      if (m.times.length >= 3) continue;
+      if (t + r > 23 * 60 + 45) break;
+      m.times.push(toHM(t));
+      t = Math.ceil((t + r + 25) / 5) * 5;
+    }
+  });
+}
+function rebuildOrder() {
+  const ns = nowSec();
+  ORDER.splice(0, ORDER.length, ...[...NOW].sort((a, b) => nextOf([a], ns).delta - nextOf([b], ns).delta));
+  firstId = ORDER[0].id; state.bi = 0;
+}
+async function loadLive() {
+  // 1) Now showing: the most popular films TMDB lists as playing in the region, released in the last 60 days
+  let np = (await tmdb("/movie/now_playing", { region: REGION, language: "en-US", page: 1 })).results || [];
+  np = np.filter(r => r.poster_path && r.backdrop_path && !r.adult);
+  const fresh = np.filter(r => r.release_date >= addDays(-60) && r.release_date <= addDays(7));
+  const picks = (fresh.length >= 4 ? fresh : np).sort((a, b) => b.popularity - a.popularity).slice(0, 4);
+  if (picks.length < 2) throw new Error("not enough now-playing films");
+  const det = await Promise.all(picks.map(r => detailsById(r.id)));
+  const films = picks.map((r, i) => {
+    const t = det[i];
+    return { id: "tm" + r.id, tmdbId: r.id, q: t.title || r.title, year: +(t.release || r.release_date || "0").slice(0, 4), t,
+      genre: t.genres.join(" · ") || "Feature", runtime: t.runtime || 120, cert: t.cert, release: t.release || r.release_date,
+      langs: t.langs.length ? t.langs : ["English"], synopsis: t.overview };
+  });
+  buildTheatre(films);
+  films.forEach(m => { if (!m.times || !m.times.length) m.times = ["18:00"]; });
+  NOW.splice(0, NOW.length, ...films);
+
+  // 2) Upcoming: popular films opening in the next ~5 months, nearest release date first
+  const pages = await Promise.all([1, 2].map(page => tmdb("/discover/movie", { sort_by: "popularity.desc", include_adult: "false", "primary_release_date.gte": addDays(1), "primary_release_date.lte": addDays(150), page })));
+  const seen = new Set(films.map(f => f.tmdbId));
+  const up = pages.flatMap(p => p.results || []).filter(r => r.poster_path && r.backdrop_path && !seen.has(r.id) && seen.add(r.id))
+    .sort((a, b) => b.popularity - a.popularity).slice(0, 24)
+    .sort((a, b) => a.release_date.localeCompare(b.release_date) || b.popularity - a.popularity).slice(0, 10);
+  const udet = await Promise.all(up.map(r => detailsById(r.id).catch(() => null)));
+  UPCOMING = up.map((r, i) => ({ q: r.title, date: r.release_date, blurb: r.overview || "", tmdbId: r.id, t: udet[i] })).filter(m => m.t);
+}
+
+/* ---------- INIT ---------- */
+renderVault();
+setInterval(tick, 1000);
+(async () => {
+  let live = false;
+  if (API_KEY) {
+    try {
+      await Promise.race([loadLive(), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 10000))]);
+      live = true;
+    } catch (e) { console.warn("Live TMDB data unavailable, using the built-in list.", e); }
+  }
+  rebuildOrder(); renderBanner(true); renderUpcoming();
+  if (!live && API_KEY) {                       // fallback list: look each film up by title
+    await Promise.all(NOW.map(async m => { m.t = await lookup(m.q, m.year); }));
+    renderBanner(true);
+    await Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q, +m.date.slice(0, 4)); }));
+    UPCOMING = UPCOMING.filter(m => Math.ceil((new Date(((m.t && m.t.release) || m.date) + "T12:00:00") - new Date()) / 864e5) > 0);
+    renderUpcoming();
+  }
+})();
 /* ---------- LIQUID GLASS (Chromium: refraction + dispersion on every pill; other browsers keep the blur fallback) ---------- */
 (function () {
   if (!/Chrome\/|Chromium\/|Edg\//.test(navigator.userAgent)) return;
