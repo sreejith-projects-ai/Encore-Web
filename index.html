@@ -170,13 +170,14 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .cert{border:1px solid var(--glass-border);border-radius:6px;padding:4px 8px;font:500 13px/1.4 var(--sans);color:var(--on-dark);background:rgba(255,255,255,0.05)}
 .bmeta i{font-style:normal;opacity:.4}
 .bsyn{color:var(--text-main);max-width:56ch;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:17px;line-height:1.6}
-.bnext{display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap;margin-top:16px}
+.bnext{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-top:4px;width:max-content;max-width:100%}
 .count{font:300 clamp(44px,6vw,64px)/1 var(--display);letter-spacing:-2px;font-variant-numeric:tabular-nums;color:var(--on-dark)}
 .count small{display:block;font:500 14px/1.55 var(--sans);letter-spacing:0;color:var(--text-muted);margin-top:8px}
 .times{display:flex;flex-wrap:wrap;gap:10px}
 .chip{font:500 14px/1 var(--display);padding:12px 18px;border-radius:9999px;background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);color:var(--on-dark)}
 .chip.past{color:var(--muted-soft);text-decoration:line-through;opacity:.5;background:transparent}
 .chip.next{background:var(--primary);color:#fff;border-color:var(--primary)}
+.screen-info{font-size:14px;color:var(--text-muted);border-bottom:1px solid var(--glass-border);padding-bottom:12px;margin-bottom:4px;width:100%}
 .bthumbs{position:absolute;right:48px;bottom:64px;display:flex;align-items:flex-end;gap:12px;z-index:2}
 .bt{position:relative;flex:none;width:clamp(88px,8.5vw,128px);aspect-ratio:16/10;border-radius:14px;overflow:hidden;padding:0;cursor:pointer;color:var(--on-dark);
   border:2px solid rgba(255,255,255,.2);background:radial-gradient(120% 120% at 80% 0%,rgba(0,113,227,.35),rgba(255,255,255,.04));opacity:.75;
@@ -199,7 +200,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 
 /* Strip (Now Showing) */
 .strip{display:flex;gap:18px;height:min(640px,78vh);min-height:480px}
-.slice{position:relative;flex:1 1 0;min-width:0;align-self:center;height:var(--h,70%);transform:translateY(var(--y,0));overflow:hidden;border:0;border-radius:0;padding:0;background:#0b0b0d;cursor:pointer;color:var(--on-dark);
+.slice{position:relative;flex:1 1 0;min-width:0;align-self:center;height:var(--h,70%);transform:translateY(var(--y,0));overflow:hidden;border:0;border-radius:12px;padding:0;background:#0b0b0d;cursor:pointer;color:var(--on-dark);
   transition:flex-grow .8s var(--ease),height .8s var(--ease),transform .8s var(--ease)}
 .slice:nth-child(4n+1){--h:76%;--y:-2%}
 .slice:nth-child(4n+2){--h:62%;--y:7%}
@@ -269,16 +270,16 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .screens>div{border-radius:24px;padding:40px;background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);box-shadow:0 8px 32px rgba(0,0,0,0.2)}
 .screens>.dk{background:rgba(255,255,255,0.06);color:var(--text-muted)}
 .screens h3{font-size:28px;letter-spacing:-0.5px;margin:20px 0 12px;font-weight:600;color:var(--text-main)}
-.frame{margin-top:24px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);display:grid;place-items:center;font:500 14px/1 var(--mono);color:var(--text-muted);background:rgba(0,0,0,0.2)}
+.screens .frame{margin-top:24px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);display:grid;place-items:center;font:500 14px/1 var(--mono);color:var(--text-muted);background:rgba(0,0,0,0.2)}
 .dk .frame{border-color:var(--primary);color:var(--text-main)}
 
 /* Upcoming */
 .soft{padding:48px 0;margin-top:48px} /* Removed solid background, mesh handles it */
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
-.ucard{position:relative;aspect-ratio:2/3;border-radius:24px;overflow:hidden;border:1px solid var(--glass-border);box-shadow:0 8px 32px rgba(0,0,0,0.2);display:flex;align-items:flex-end;padding:20px}
-.ucard .po{position:absolute;inset:0;z-index:0;background:rgba(255,255,255,0.05)}
-.ucard .po::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.8) 0%,transparent 60%);pointer-events:none}
-.ucard > :not(.po){position:relative;z-index:1}
+.ucarousel { position: relative; width: 100%; height: min(560px, 65vh); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+.ucard { position: absolute; width: clamp(180px, 28vw, 320px); aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: flex; align-items: flex-end; padding: 20px; transition: transform 0.6s var(--ease), opacity 0.6s var(--ease), filter 0.6s var(--ease); will-change: transform, opacity; cursor: pointer; }
+.ucard .po { position: absolute; inset: 0; z-index: 0; background: rgba(255,255,255,0.05); }
+.ucard .po::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,.85) 0%, transparent 60%); pointer-events: none; }
+.ucard > :not(.po) { position: relative; z-index: 1; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
 
 /* Vault */
 .vault{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);border-radius:32px;padding:64px;color:var(--text-muted);box-shadow:0 12px 48px rgba(0,0,0,0.3)}
@@ -361,7 +362,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .cv .soon{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;color:var(--text-muted);padding-bottom:30px}
 
 /* ====== MOBILE OPTIMIZATION ====== */
-@media(max-width:1023px){.grid4{grid-template-columns:repeat(2,1fr)}.vlist{grid-template-columns:repeat(2,1fr)}.bposter{display:none}}
+@media(max-width:1023px){.vlist{grid-template-columns:repeat(2,1fr)}.bposter{display:none}}
 .m-only,.bmore,.hm{display:none}
 @media(max-width:767px){
   /* Header */
@@ -385,12 +386,13 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   .bsyn,.hm{display:none}
   .pills{justify-content:center}
   .bmeta{font-size:13px;gap:6px 10px;justify-content:center}
-  .bnext{flex-direction:column;align-items:center;gap:12px;margin-top:2px;width:100%}
+  .bnext{align-items:center;margin-top:2px}
   .count{font-size:40px;letter-spacing:-1.5px}
   .count small{font-size:13px;margin-top:4px}
   .times{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none;gap:8px;justify-content:center}
   .times::-webkit-scrollbar{display:none}
   .chip{padding:10px 14px;font-size:13px;flex:none}
+  .screen-info{width:max-content;padding-left:24px;padding-right:24px;margin-left:auto;margin-right:auto}
   .bmore{display:inline-flex;width:100%;height:48px;margin-top:8px}
 
   .bthumbs{position:relative;left:auto;right:auto;bottom:auto;z-index:2;width:100%;padding:16px 20px 22px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 20px;scrollbar-width:none;display:flex;gap:10px;-webkit-overflow-scrolling:touch}
@@ -401,7 +403,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   /* Now showing: swipeable poster cards */
   .strip{flex-direction:row;height:auto;min-height:0;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -24px;padding:0 24px 8px;scroll-padding:0 24px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .strip::-webkit-scrollbar{display:none}
-  .slice,.slice:nth-child(n){flex:0 0 72vw;max-width:320px;height:auto;aspect-ratio:2/3;transform:none;scroll-snap-align:start;border-radius:16px}
+  .slice,.slice:nth-child(n){flex:0 0 72vw;max-width:320px;height:auto;aspect-ratio:2/3;transform:none;scroll-snap-align:start;border-radius:12px}
   .slice .art,.slice.on .art{filter:none;transform:none}
   .slice .slogo,.slice.on .slogo{top:auto;bottom:128px;transform:translateX(-50%);max-height:16.2%;max-width:70%}
   .sd,.slice.on .sd{opacity:1;transform:none;bottom:20px}
@@ -447,8 +449,8 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   .cv figure{flex-basis:84%}
 
   /* Upcoming & Vault grids */
-  .grid4{grid-template-columns:repeat(2,1fr);gap:12px}
-  .ucard{padding:12px;border-radius:16px}
+  .ucarousel { height: 440px; margin-top: 0; }
+  .ucard{padding:12px; border-radius:12px; width: clamp(160px, 45vw, 220px);}
   
   .vault{padding:28px 16px;border-radius:20px}
   .v-top{margin-bottom:28px}
@@ -473,7 +475,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}}
 
-/* All titles: Racing Sans One (single weight), 2% letter spacing, first letter of each word capitalised */
+/* All titles: Racing Sans One (single weight), 1% letter spacing, first letter of each word capitalised */
 h1,h2,h3,.d-xl,.d-lg,.d-md,.d-sm,.brand-name,.fx .xh,.syn-wrap .xh,.cv-head h3,.slogo.st,.bt .tt,.ucard h3,.vcard h3,.scr-head h2{font-family:"Racing Sans One",var(--display);font-weight:400;letter-spacing:.02em;text-transform:capitalize}
 
 /* Desktop: one equal gap between title/details, Overview, Director, Cast and Gallery */
@@ -517,7 +519,7 @@ h1,h2,h3,.d-xl,.d-lg,.d-md,.d-sm,.brand-name,.fx .xh,.syn-wrap .xh,.cv-head h3,.
       <svg viewBox="0 0 22 22" aria-hidden="true"><line class="l1" x1="3" y1="5" x2="19" y2="5"/><line class="l2" x1="3" y1="11" x2="19" y2="11"/><line class="l3" x1="3" y1="17" x2="19" y2="17"/></svg>
     </button>
     <nav class="menu-panel" id="menuPanel" aria-label="Sections">
-      <a class="glass" href="#now">Now Showing</a><a class="glass" href="#upcoming">Upcoming</a><a class="glass" href="#vault">Vault</a>
+      <a class="glass" href="#upcoming">Upcoming</a><a class="glass" href="#vault">Vault</a>
     </nav>
   </div>
 </header>
@@ -531,23 +533,10 @@ h1,h2,h3,.d-xl,.d-lg,.d-md,.d-sm,.brand-name,.fx .xh,.syn-wrap .xh,.cv-head h3,.
     <div class="bthumbs" id="bthumbs" role="tablist" aria-label="Choose a movie"></div>
   </section>
 
-  <!-- Now showing -->
-  <section class="sec" id="now"><div class="wrap">
-    <div class="sec-head" style="justify-content: center; text-align: center;">
-      <h2 class="d-lg">Now showing</h2>
-    </div>
-    <div class="strip" id="strip"></div>
-  </div></section>
-
   <!-- Upcoming -->
   <section class="soft" id="upcoming"><div class="wrap">
-    <div class="sec-head" style="flex-direction: column; align-items: center; text-align: center; gap: 12px;">
+    <div class="sec-head" style="flex-direction: column; align-items: center; text-align: center; margin-bottom: 8px;">
       <h2 class="d-lg">Upcoming releases</h2>
-      <p style="max-width: none;">Dates come from TMDB and can shift. Showtimes appear here once scheduled.
-        <a href="https://www.themoviedb.org/movie/upcoming" target="_blank" rel="noopener noreferrer" style="display: inline-flex; vertical-align: middle; margin-left: 6px; opacity: 0.5; transition: opacity 0.2s; color: var(--text-main);" aria-label="TMDB Upcoming Releases" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-        </a>
-      </p>
     </div>
     <div class="grid4" id="ugrid"></div>
   </div></section>
@@ -635,11 +624,15 @@ const NOW = [
     note: "Flat 1.85:1 frame, with slightly more height than Scope.",
     synopsis: "Peter Parker tries to build a quieter life in a city that remembers him.", times: ["12:30", "18:00"] }
 ];
-const UPCOMING = [
-  { q: "Dune: Part Three", date: "2026-12-18", blurb: "The saga of Paul Atreides reaches its final chapter." },
-  { q: "Narnia: The Magician's Nephew", date: "2026-11-26", blurb: "Greta Gerwig's take on the origins of Narnia." },
+let UPCOMING = [
+  { q: "Dune: Part Three", date: "2027-12-18", blurb: "The saga of Paul Atreides reaches its final chapter." },
+  { q: "Narnia: The Magician's Nephew", date: "2027-11-26", blurb: "Greta Gerwig's take on the origins of Narnia." },
   { q: "Shrek 5", date: "2027-06-30", blurb: "The ogre returns to the swamp." },
-  { q: "The Batman Part II", date: "2027-10-01", blurb: "Gotham's detective returns." }
+  { q: "The Batman Part II", date: "2027-10-01", blurb: "Gotham's detective returns." },
+  { q: "Avengers: Secret Wars", date: "2027-05-07", blurb: "The culmination of the Multiverse Saga." },
+  { q: "Star Wars: New Jedi Order", date: "2027-12-17", blurb: "Rey Skywalker rebuilds the Jedi order." },
+  { q: "Supergirl: Woman of Tomorrow", date: "2027-06-26", blurb: "Kara Zor-El's cosmic journey." },
+  { q: "Spider-Man: Beyond the Spider-Verse", date: "2027-03-20", blurb: "Miles Morales' journey concludes." }
 ];
 const VAULT_SEED = [["Blade Runner", 1982, 42], ["Spirited Away", 2001, 37], ["2001: A Space Odyssey", 1968, 31], ["Alien", 1979, 24], ["Back to the Future", 1985, 19], ["Akira", 1988, 15]];
 
@@ -656,7 +649,7 @@ const dur = m => `${Math.floor(m / 60)}h ${pad(m % 60)}m`;
 const fdate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 const img = (p, size) => `<img src="${IMG}${size}${p}" alt="" loading="lazy">`;
 const poster = (m, size = "w500") => m.t && m.t.poster ? img(m.t.poster, size) : `<div class="ph"><span>${esc(m.q)}</span></div>`;
-const pill = m => { const s = SCREENS[m.screen]; return `<span class="badge">${esc(s.short)} · ${esc(m.ratio.split(" ")[0])}</span>`; };
+const screenText = m => { const s = SCREENS[m.screen]; return `<div class="screen-info">${esc(s.short)} · ${esc(m.ratio.split(" ")[0])}</div>`; };
 function view(m) {
   const t = m.t || {};
   return {
@@ -768,12 +761,18 @@ function renderBanner(first) {
     $("#bposter").innerHTML = poster(m, "w500");
     $("#bcont").innerHTML = `
       <h1 class="d-xl${t.logo ? " has-logo" : ""}">${t.logo ? `<img class="blogo" src="${IMG}w500${t.logo}" alt="${esc(m.q)}" onerror="this.replaceWith(this.alt)">` : esc(m.q)}</h1>
-      <div class="pills">${pill(m)}<span class="badge hm">${esc(s.kind)}</span></div>
+      <div class="pills"><span class="badge hm">${esc(s.kind)}</span></div>
       <div class="bmeta"><span class="cert">${esc(m.cert)}</span><i>|</i><span>${dur(v.runtime)}</span><i>|</i><span>${esc(v.genre)}</span><i class="hm">|</i><span class="hm">Released ${fdate(v.release)}</span></div>
       <div class="bmeta hm"><span>Languages: ${esc(v.langs.join(", "))}</span><i>|</i><span class="mono">${esc(m.ratio)}</span></div>
-      <p class="bsyn">${esc(v.syn)}</p>
+      <div class="d-only">
+        <div style="display:flex; flex-direction:column; gap: 16px; margin-bottom: 24px;">
+          <p class="bsyn" style="margin:0">${esc(v.syn)}</p>
+          <button class="btn btn-dk" data-more style="width: max-content;">Full details</button>
+        </div>
+      </div>
       <div class="bnext">
-        <div class="times" data-id="${m.id}">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
+        ${screenText(m)}
+        <div class="times" data-id="${m.id}" style="width: 100%;">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
       </div>
       <button class="btn btn-dk bmore" data-more>Full details</button>`;
     $("#bcont").classList.remove("out");
@@ -798,37 +797,6 @@ function renderThumbs() {
 $("#bcont").addEventListener("click", e => { const b = e.target.closest("[data-more]"); if (b) openFilm(ORDER[state.bi].id, b); });
 MOB.addEventListener("change", () => renderBanner(true));
 $("#bthumbs").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (b && +b.dataset.i !== state.bi) { clearTimeout(bannerAutoT); goBanner(+b.dataset.i); } });
-
-/* ---------- NOW SHOWING STRIP ---------- */
-state.active = -1;
-function slice(m, i) {
-  const v = view(m), t = m.t || {};
-  return `<button class="slice${state.active === i ? " on" : ""}" data-id="${m.id}" data-i="${i}" aria-label="${esc(m.q)}, open full details">
-    <span class="art">${poster(m, "w780")}</span>
-    ${t.logo ? `<img class="slogo" src="${IMG}w500${t.logo}" alt="">` : `<span class="slogo st">${esc(m.q)}</span>`}
-    <span class="sd">${pill(m)}<span class="sm">${esc(v.genre)} · ${dur(v.runtime)} · ${esc(m.cert)}${v.score ? " · " + v.score : ""}</span><span class="sh">Select for full details</span></span>
-  </button>`;
-}
-function renderStrip() { $("#strip").innerHTML = NOW.map(slice).join(""); tick(); }
-function setActive(i) { state.active = i; $$("#strip .slice").forEach((el, k) => el.classList.toggle("on", k === i)); }
-
-// Auto-play: details appear one movie at a time until the pointer is on the strip
-let autoT;
-const hovering = () => strip.matches(":hover");
-const kbFocus = () => { const el = document.activeElement; return !!(el && el.closest && el.closest("#strip") && el.matches(":focus-visible")); };
-function auto(delay) {
-  clearTimeout(autoT);
-  if (RM || MOB.matches) return;
-  // keeps cycling unless the pointer is on the strip, a keyboard user is focused in it, or a film view is open
-  autoT = setTimeout(() => { if (!state.open && !hovering() && !kbFocus()) setActive((state.active + 1) % NOW.length); auto(3500); }, delay);
-}
-const strip = $("#strip");
-strip.addEventListener("mouseover", e => { const el = e.target.closest(".slice"); if (el) setActive(+el.dataset.i); });
-strip.addEventListener("mouseleave", () => auto(2500));
-strip.addEventListener("focusin", e => { const el = e.target.closest(".slice"); if (el && el.matches(":focus-visible")) setActive(+el.dataset.i); });
-strip.addEventListener("focusout", () => auto(2500));
-strip.addEventListener("click", e => { const el = e.target.closest(".slice"); if (el) openFilm(el.dataset.id, el); });
-auto(1500);
 
 /* ---------- FULLSCREEN FILM VIEW ---------- */
 const synBlock = text => `<div class="syn-wrap"><h3 class="xh">Overview</h3><p class="syn" data-full="${esc(text)}">${esc(text)}</p></div>`;
@@ -860,7 +828,10 @@ function filmHTML(m) {
   
   const detailsHtmlDesk = `
       ${synBlock(v.syn)}
-      <div class="times" data-id="${m.id}">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
+      <div style="display:flex; flex-direction:column; margin-top:16px; width:max-content; max-width:100%">
+        ${screenText(m)}
+        <div class="times" data-id="${m.id}" style="width:100%;">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
+      </div>
       <p class="mnext" data-mnext="${m.id}"></p>
   `;
 
@@ -870,9 +841,10 @@ function filmHTML(m) {
 
   return `<div class="fh"><div class="fl">
       ${t.logo ? `<img class="flogo" src="${IMG}w500${t.logo}" alt="${esc(m.q)}">` : `<h2 class="d-xl">${esc(m.q)}</h2>`}
-      <div class="meta">${pill(m)}<span class="badge">${esc(s.kind)}</span><span class="badge">${esc(m.cert)}</span><span class="badge">${dur(v.runtime)}</span>${v.score ? `<span class="badge">${v.score}</span>` : ""}</div>
+      <div class="meta"><span class="badge">${esc(s.kind)}</span><span class="badge">${esc(m.cert)}</span><span class="badge">${dur(v.runtime)}</span>${v.score ? `<span class="badge">${v.score}</span>` : ""}</div>
       <p class="fm">${esc(v.genre)} · Released ${fdate(v.release)} · ${esc(v.langs.join(", "))}</p>
       <div class="m-only-times">
+        ${screenText(m)}
         <div class="times" data-id="${m.id}">${m.times.map(x => `<span class="chip" data-m="${mins(x)}">${fmt12(x)}</span>`).join("")}</div>
         <p class="mnext" data-mnext="${m.id}" style="margin:0"></p>
       </div>
@@ -975,7 +947,6 @@ function closeFilm() {
   document.documentElement.style.overflow = "";
   const f = filmFrom; filmFrom = null;
   if (f && document.contains(f)) f.focus({ preventScroll: true });
-  auto(3000);
 }
 $$(".screens [data-screen]").forEach(el => {
   el.addEventListener("click", () => openScreen(+el.dataset.screen, el));
@@ -1018,15 +989,75 @@ film.addEventListener("scroll", () => {
 }, { passive: true });
 
 /* ---------- UPCOMING ---------- */
+let uActive = 0;
+let uInterval;
+let uListened = false;
+
+function updateUpcomingCarousel() {
+  const len = UPCOMING.length;
+  const cards = $$('.ucard', $('#ugrid'));
+  if (!cards.length || !len) return;
+  
+  cards.forEach((c, i) => {
+    let diff = (i - uActive + len) % len;
+    if (diff > Math.floor(len / 2)) diff -= len;
+    let absDiff = Math.abs(diff);
+    
+    let scale = Math.max(0.5, 1 - absDiff * 0.15);
+    let tx = diff * 90;
+    if (absDiff === 2) tx = Math.sign(diff) * 160;
+    if (absDiff > 2) tx = Math.sign(diff) * 220;
+
+    c.style.transform = `translateX(${tx}%) scale(${scale})`;
+    c.style.zIndex = 10 - absDiff;
+    c.style.opacity = absDiff > 2 ? 0 : 1;
+    c.style.filter = absDiff === 0 ? 'brightness(1)' : 'brightness(0.6)';
+    c.style.pointerEvents = absDiff === 0 ? 'auto' : 'auto';
+  });
+}
+
+function startUpcomingAuto() {
+  clearInterval(uInterval);
+  if (RM) return;
+  uInterval = setInterval(() => {
+    if (UPCOMING.length) {
+      uActive = (uActive + 1) % UPCOMING.length;
+      updateUpcomingCarousel();
+    }
+  }, 5000);
+}
+
 function renderUpcoming() {
-  $("#ugrid").innerHTML = UPCOMING.map(m => {
+  const uc = $("#ugrid");
+  if (uActive >= UPCOMING.length) uActive = 0;
+  uc.className = "ucarousel";
+  uc.innerHTML = UPCOMING.map((m, i) => {
     const rel = (m.t && m.t.release) || m.date, days = Math.ceil((new Date(rel + "T12:00:00") - new Date()) / 864e5);
-    return `<article class="ucard"><div class="po">${poster(m)}</div>
+    return `<article class="ucard" data-idx="${i}">
+      <div class="po">${poster(m)}</div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;text-align:center">
-        <span class="badge">${days > 0 ? fdate(rel) : "Out now"}</span>
+        <span class="badge">${days > 0 ? fdate(rel) : "Coming soon"}</span>
         ${days > 0 ? `<span style="font-size:14px;color:var(--text-muted)">in ${days} days</span>` : ""}
-      </div></article>`;
+      </div>
+    </article>`;
   }).join("");
+  
+  updateUpcomingCarousel();
+  startUpcomingAuto();
+
+  if (!uListened) {
+    uListened = true;
+    uc.addEventListener('mouseenter', () => clearInterval(uInterval));
+    uc.addEventListener('mouseleave', startUpcomingAuto);
+    uc.addEventListener('click', e => {
+      const card = e.target.closest('.ucard');
+      if (card) {
+        uActive = +card.dataset.idx;
+        updateUpcomingCarousel();
+        startUpcomingAuto();
+      }
+    });
+  }
 }
 
 /* ---------- VAULT ---------- */
@@ -1091,10 +1122,16 @@ $("#vform").addEventListener("submit", e => {
 });
 
 /* ---------- INIT ---------- */
-renderBanner(true); renderStrip(); renderUpcoming(); renderVault();
+renderBanner(true); renderUpcoming(); renderVault();
 setInterval(tick, 1000);
-Promise.all(NOW.map(async m => { m.t = await lookup(m.q, m.year); })).then(() => { renderStrip(); renderBanner(true); });
-Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q); })).then(renderUpcoming);
+Promise.all(NOW.map(async m => { m.t = await lookup(m.q, m.year); })).then(() => { renderBanner(true); });
+Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q); })).then(() => {
+  UPCOMING = UPCOMING.filter(m => {
+    const rel = (m.t && m.t.release) || m.date;
+    return Math.ceil((new Date(rel + "T12:00:00") - new Date()) / 864e5) > 0;
+  });
+  renderUpcoming();
+});
 /* ---------- LIQUID GLASS (Chromium: refraction + dispersion on every pill; other browsers keep the blur fallback) ---------- */
 (function () {
   if (!/Chrome\/|Chromium\/|Edg\//.test(navigator.userAgent)) return;
