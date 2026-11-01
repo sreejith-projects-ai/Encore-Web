@@ -178,7 +178,8 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .chip.past{color:var(--muted-soft);text-decoration:line-through;opacity:.5;background:transparent}
 .chip.next{background:var(--primary);color:#fff;border-color:var(--primary)}
 .screen-info{font-size:14px;color:var(--text-muted);border-bottom:1px solid var(--glass-border);padding-bottom:12px;margin-bottom:4px;width:100%}
-.bthumbs{position:absolute;right:48px;bottom:64px;display:flex;align-items:flex-end;gap:12px;z-index:2}
+.bthumbs{position:absolute;right:48px;bottom:64px;display:flex;align-items:flex-end;gap:12px;z-index:2;transition:opacity .25s,transform .4s var(--ease)}
+.bthumbs.out{opacity:0;transform:translateY(12px) !important}
 .bt{position:relative;flex:none;width:clamp(88px,8.5vw,128px);aspect-ratio:16/10;border-radius:14px;overflow:hidden;padding:0;cursor:pointer;color:var(--on-dark);
   border:2px solid rgba(255,255,255,.2);background:radial-gradient(120% 120% at 80% 0%,rgba(0,113,227,.35),rgba(255,255,255,.04));opacity:.75;
   transition:transform .35s var(--ease),border-color .3s,opacity .3s,box-shadow .3s}
@@ -188,7 +189,8 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
 .bt .lg{position:absolute;z-index:2;left:8px;bottom:8px;max-width:72%;max-height:42%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.6))}
 .bt .tt{position:absolute;z-index:2;left:8px;right:8px;bottom:8px;font:600 11px/1.2 var(--display);text-align:left;text-shadow:0 1px 4px rgba(0,0,0,.7)}
 .bt[aria-selected=true]{opacity:1;border-color:var(--primary);transform:translateY(-6px) scale(1.07);box-shadow:0 0 0 3px rgba(0,113,227,.25),0 12px 28px rgba(0,0,0,.5)}
-.bposter{position:absolute;right:48px;top:50%;transform:translateY(-58%);width:min(280px,22vw);aspect-ratio:2/3;border-radius:24px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.5);border:1px solid var(--glass-border);animation:fade .8s var(--ease)}
+.bposter{position:absolute;right:48px;top:50%;transform:translateY(-58%);width:min(280px,22vw);aspect-ratio:2/3;border-radius:24px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.5);border:1px solid var(--glass-border);animation:fade .8s var(--ease);transition:opacity .25s,transform .4s var(--ease)}
+.bposter.out{opacity:0;transform:translateY(calc(-58% + 12px)) !important}
 .bposter img{width:100%;height:100%;object-fit:cover}
 @keyframes fade{from{opacity:0}}
 
@@ -452,7 +454,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   .cv figure{flex-basis:84%}
 
   /* Upcoming & Vault grids */
-  .ucarousel { height: 560px; margin-top: 8px; width: 100vw; margin-left: calc(-50vw + 50%); }
+  .ucarousel { height: 560px; margin-top: 0; width: 100vw; margin-left: calc(-50vw + 50%); }
   .ucard{padding:16px; border-radius:12px; width: clamp(200px, 60vw, 280px);}
   
   .vault{padding:28px 16px;border-radius:20px}
@@ -473,7 +475,7 @@ h1,h2,h3,.serif{font-family:var(--display);font-weight:600;color:var(--ink);lett
   /* Section spacing */
   .sec{padding-top:48px}
   .sec-head{flex-direction:column;align-items:center;margin-bottom:20px;gap:8px}
-  .soft{padding:16px 0 16px;margin-top:0}
+  .soft{padding:72px 0 16px;margin-top:0}
   .soft .sec-head{margin-bottom:0}
   .foot{margin-top:48px;padding:40px 20px}
 }
@@ -539,7 +541,7 @@ h1,h2,h3,.d-xl,.d-lg,.d-md,.d-sm,.brand-name,.fx .xh,.syn-wrap .xh,.cv-head h3,.
 
   <!-- Upcoming -->
   <section class="soft" id="upcoming"><div class="wrap">
-    <div class="sec-head" style="flex-direction: column; align-items: center; text-align: center; margin-bottom: 8px;">
+    <div class="sec-head" style="flex-direction: column; align-items: center; text-align: center; margin-bottom: 0;">
       <h2 class="d-lg">Upcoming releases</h2>
     </div>
     <div class="grid4" id="ugrid"></div>
@@ -787,11 +789,18 @@ function renderBanner(first) {
       </div>
       <button class="btn btn-dk bmore" data-more>Full details</button>`;
     $("#bcont").classList.remove("out");
+    $("#bposter").classList.remove("out");
+    $("#bthumbs").classList.remove("out");
     renderThumbs();
     tick();
     startBannerAuto();
   };
-  if (first) set(); else { $("#bcont").classList.add("out"); setTimeout(set, 250); }
+  if (first) set(); else { 
+    $("#bcont").classList.add("out"); 
+    $("#bposter").classList.add("out");
+    $("#bthumbs").classList.add("out");
+    setTimeout(set, 250); 
+  }
 }
 function goBanner(i) { state.bi = (i + ORDER.length) % ORDER.length; renderBanner(false); }
 function renderThumbs() {
@@ -1272,7 +1281,7 @@ Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q); })).then(() => {
 /* ---------- HIDE HEADER & PARALLAX ON SCROLL ---------- */
 (function () {
   const bar = $(".topbar"), btn = $("#menuBtn"), panel = $("#menuPanel");
-  const bbg = $("#bbg"), bposter = $("#bposter"), bthumbs = $("#bthumbs");
+  const bbg = $("#bbg");
   let last = scrollY, tick = false;
   function update() {
     tick = false;
@@ -1285,11 +1294,9 @@ Promise.all(UPCOMING.map(async m => { m.t = await lookup(m.q); })).then(() => {
     }
     if (Math.abs(d) > 6) last = y;
     
-    // Parallax Effect for Banner Layers
+    // Parallax Effect for Banner Layers (Background only)
     if (y < window.innerHeight) {
       if (bbg) bbg.style.transform = `translateY(${y * 0.4}px)`;
-      if (bposter) bposter.style.transform = `translateY(calc(-58% + ${y * 0.15}px))`;
-      if (bthumbs) bthumbs.style.transform = `translateY(${y * 0.08}px)`;
     }
   }
   addEventListener("scroll", () => { if (!tick) { tick = true; requestAnimationFrame(update); } }, { passive: true });
